@@ -75,7 +75,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         AS
         SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
 	        ,a.fspno 采购订单号,org.FNUMBER 收料组织,isnull(dep.fnumber,' ') 收料部门,isnull(sup.FNUMBER,' ') 供应商,isnull(org2.fnumber,'') 货主
-	        ,mtl.FNUMBER 物料编码,oe.FQTY 采购数量,oer.FREMAINSTOCKINQTY 剩余入库数量,a.fssl 入库数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,a.fscwid 仓位,a.fspc 批号
+	        ,mtl.FNUMBER 物料编码,oe.FQTY 采购数量,oer.FREMAINSTOCKINQTY 剩余入库数量,a.fssl 入库数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
         INNER JOIN  T_PUR_POORDERENTRY oe ON a.Fsentry = oe.FENTRYID
@@ -87,6 +87,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
         WHERE a.fsbs = 0 AND a.fsrklx = 11";
@@ -97,7 +99,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         AS
         SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
 	        ,a.fspno 收料通知单号,org.FNUMBER 收料组织,isnull(dep.fnumber,' ') 收料部门,isnull(sup.FNUMBER,' ') 供应商,isnull(org2.fnumber,'') 货主
-	        ,mtl.FNUMBER 物料编码,oe.FACTRECEIVEQTY 交货数量,oe.FACTRECEIVEQTY - oes.FINSTOCKQTY 剩余入库数量,a.fssl 入库数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,a.fscwid 仓位,a.fspc 批号
+	        ,mtl.FNUMBER 物料编码,oe.FACTRECEIVEQTY 交货数量,oe.FACTRECEIVEQTY - oes.FINSTOCKQTY 剩余入库数量,a.fssl 入库数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
         INNER JOIN  T_PUR_RECEIVEENTRY oe ON a.Fsentry = oe.FENTRYID
@@ -109,6 +111,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
         WHERE a.fsbs = 0 AND a.fsrklx = 1";
@@ -119,7 +123,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         AS
         SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
 	        ,a.fspno 采购入库单号,org.FNUMBER 退料组织,isnull(dep.fnumber,' ') 退料部门,isnull(sup.FNUMBER,' ') 供应商,isnull(org2.fnumber,'') 货主
-	        ,mtl.FNUMBER 物料编码,oe.FMUSTQTY 应收数量,oe.FREALQTY 实收数量,a.fssl 实退数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,a.fscwid 仓位,a.fspc 批号
+	        ,mtl.FNUMBER 物料编码,oe.FMUSTQTY 应收数量,oe.FREALQTY 实收数量,a.fssl 实退数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
         INNER JOIN  T_STK_INSTOCKENTRY oe ON a.Fsentry = oe.FENTRYID
@@ -130,6 +134,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
         WHERE a.fsbs = 0 AND a.fsrklx = 9";
@@ -140,7 +146,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         AS
         SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
 	        ,a.fspno 发货通知单号,cus.FNUMBER 客户,org.FNUMBER 发货组织,isnull(dep.fnumber,' ') 发货部门
-	        ,mtl.FNUMBER 物料编码,oe.FQTY - oe.FBASESUMOUTQTY 应发数量,a.fssl 实发数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,a.fscwid 仓位,a.fspc 批号
+	        ,mtl.FNUMBER 物料编码,oe.FQTY - oe.FBASESUMOUTQTY 应发数量,a.fssl 实发数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
         INNER JOIN T_SAL_DELIVERYNOTICE o ON a.fsid = O.FID
@@ -151,6 +157,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
         WHERE a.fsbs = 0 AND a.fsrklx = 7";
@@ -161,7 +169,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         AS
         SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
 	        ,a.fspno 销售出库单号,cus.FNUMBER 客户,org.FNUMBER 销售组织,isnull(dep.fnumber,' ') 销售部门
-	        ,mtl.FNUMBER 物料编码,oe.FMUSTQTY 数量,a.fssl 实退数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,a.fscwid 仓位,a.fspc 批号
+	        ,mtl.FNUMBER 物料编码,oe.FMUSTQTY 数量,a.fssl 实退数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
         INNER JOIN T_SAL_OUTSTOCK o ON a.fsid = O.FID
@@ -172,6 +180,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         LEFT JOIN T_BD_STOCK stk ON oe.FSTOCKID = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
         WHERE a.fsbs = 0 AND a.fsrklx = 4";
@@ -201,7 +211,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 2 生产订单-生产入库
         /// </summary>
         private const string C_PrdMo_PrdInStock = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid FORGID,a.fspno 生产订单号,org2.FNUMBER 入库组织,ISNULL(org.fnumber,'') 货主,oe.FPRODUCTTYPE 产品类型,oe.FCOSTRATE,ISNULL(DEP.FNUMBER,'') 部门
-	        ,mtl.FNUMBER 物料编码,oq.FNOSTOCKINQTY 应收数量,a.fssl 实收数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,a.fscwid 仓位,a.fspc 批号
+	        ,mtl.FNUMBER 物料编码,oq.FNOSTOCKINQTY 应收数量,a.fssl 实收数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码	
         FROM xbt_data a
         INNER JOIN  T_PRD_MOENTRY oe ON a.Fsentry = oe.FENTRYID
@@ -209,6 +219,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         INNER JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_DEPARTMENT dep ON oe.FWORKSHOPID = dep.FDEPTID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN T_ORG_ORGANIZATIONS org ON a.fownerid = org.FORGID
@@ -222,7 +234,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 21 生产入库-生产退库
         /// </summary>
         private const string C_PrdInStock_PrdRetStock = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid FORGID,a.fspno 生产入库单号,org2.FNUMBER 退库组织,ISNULL(org.fnumber,'') 货主,oe.FPRODUCTTYPE 产品类型,ISNULL(DEP.FNUMBER,'') 部门
-	        ,mtl.FNUMBER 物料编码, oe.FMUSTQTY 应退数量, a.fssl 实退数量, unt.FNUMBER 单位, ISNULL(stk.fnumber, ' ') 仓库,a.fscwid 仓位, a.fspc 批号
+	        ,mtl.FNUMBER 物料编码, oe.FMUSTQTY 应退数量, a.fssl 实退数量, unt.FNUMBER 单位, ISNULL(stk.fnumber, ' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位, a.fspc 批号
             , ISNULL(us.FNUMBER, ' ') 操作员,b.fscjqh 机器号, b.fsuser 用户, b.fspwd 密码
             , oe.FSRCBILLNO FMOBILLNO, OE.FSRCENTRYID FMOENTRYID
         FROM xbt_data a
@@ -230,6 +242,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_DEPARTMENT dep ON oe.FWORKSHOPID = dep.FDEPTID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN T_ORG_ORGANIZATIONS org ON a.fownerid = org.FORGID
@@ -260,7 +274,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 6 生产用料清单-生产领料
         /// </summary>
         private const string C_PrdPPBom_PrdPickMtrl = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid FORGID,a.fspno 生产用料清单号,org.FNUMBER 发料组织,ISNULL(org2.fnumber,'') 货主,ISNULL(DEP.FNUMBER,'') 部门
-	        ,mtl.FNUMBER 物料编码,oe.FNEEDQTY 申请数量,a.fssl 实发数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,a.fscwid 仓位,a.fspc 批号
+	        ,mtl.FNUMBER 物料编码,oe.FNEEDQTY 申请数量,a.fssl 实发数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
 	        ,oe.FMOID,oe.fmobillno,oe.fmoentryid,oe.FMOENTRYSEQ,oe.fbomentryid
         FROM xbt_data a
@@ -271,6 +285,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON oe.FMATERIALID = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_DEPARTMENT dep ON a.FsDepartid = dep.FDEPTID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN 
@@ -282,7 +298,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 5 生产领料-生产退料
         /// </summary>
         private const string C_PrdPickMtrl_PrdReturnMtrl = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,oe.FSEQ,a.Forgid FORGID,a.fspno 生产领料单号,org2.FNUMBER 收料组织,ISNULL(org.fnumber,'') 货主,ISNULL(DEP.FNUMBER,'') 部门
-	        ,oea.FPARENTMATERIALID,mtl2.FNUMBER 产品编码,mtl.FNUMBER 物料编码,oe.FAPPQTY 申请数量,a.fssl 实退数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,a.fscwid 仓位,a.fspc 批号
+	        ,oea.FPARENTMATERIALID,mtl2.FNUMBER 产品编码,mtl.FNUMBER 物料编码,oe.FAPPQTY 申请数量,a.fssl 实退数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
 	        ,oe.FSRCBILLTYPE,oe.FSRCINTERID,FSRCENTRYID,oe.FSRCENTRYSEQ,oe.FSRCBILLNO,oe.FPPBOMBILLNO,oe.FPPBOMENTRYID,oe.FMOID,oe.FMOBILLNO,oe.FMOENTRYID,oe.FMOENTRYSEQ
         FROM xbt_data a
@@ -294,6 +310,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         LEFT JOIN T_BD_MATERIAL mtl2 ON oea.FPARENTMATERIALID = mtl2.FMATERIALID
         LEFT JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         LEFT JOIN T_BD_STOCK stk ON oe.FSTOCKID = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_DEPARTMENT dep ON oe.FWORKSHOPID = dep.FDEPTID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN 
@@ -305,7 +323,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 3 其他入库
         /// </summary>
         private const string C_STK_MISCELLANEOUS = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid,isnull(sup.FNUMBER,' ') 供应商
-	        ,mtl.FNUMBER 物料编码,a.fssl 实收数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,a.fscwid 仓位,org2.FNUMBER 库存组织,isnull(dep.fnumber,' ') 部门,a.fspc 批号
+	        ,mtl.FNUMBER 物料编码,a.fssl 实收数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位,org2.FNUMBER 库存组织,isnull(dep.fnumber,' ') 部门,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,isnull(org.fnumber,'') 货主
 	        ,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
@@ -313,6 +331,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_DEPARTMENT dep ON a.FsDepartid = dep.FDEPTID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN T_ORG_ORGANIZATIONS org ON a.fownerid = org.FORGID
@@ -326,7 +346,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 8 其他出库
         /// </summary>
         private const string C_STK_MisDelivery = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid,isnull(cut.FNUMBER,' ') 客户
-	        ,mtl.FNUMBER 物料编码,a.fssl 实发数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,a.fscwid 仓位,org2.FNUMBER 库存组织,isnull(dep.fnumber,' ') 部门,a.fspc 批号
+	        ,mtl.FNUMBER 物料编码,a.fssl 实发数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(F.FNUMBER,'0') 仓位,org2.FNUMBER 库存组织,isnull(dep.fnumber,' ') 部门,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,isnull(org.fnumber,'') 货主
 	        ,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
@@ -334,6 +354,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         INNER JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         LEFT JOIN T_BD_DEPARTMENT dep ON a.FsDepartid = dep.FDEPTID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN T_ORG_ORGANIZATIONS org ON a.fownerid = org.FORGID
@@ -346,7 +368,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <summary>
         /// 34,35 组装拆卸单
         /// </summary>
-        private const string C_STK_AssembleAPP = @"SELECT a.fskey,a.finnerid,org.FNUMBER 库存组织,org2.FNUMBER 货主,ISNULL(dep.FNUMBER,'') 部门,mtl.FNUMBER 物料编码,unt.FNUMBER 单位,a.fssl 数量,stk.FNUMBER 仓库,a.fscwid 仓位
+        private const string C_STK_AssembleAPP = @"SELECT a.fskey,a.finnerid,org.FNUMBER 库存组织,org2.FNUMBER 货主,ISNULL(dep.FNUMBER,'') 部门,mtl.FNUMBER 物料编码,unt.FNUMBER 单位,a.fssl 数量,stk.FNUMBER 仓库,ISNULL(F.FNUMBER,'0') 仓位
         ,mtl2.FNUMBER 子件物料编码,unt2.FNUMBER 子件单位,ae.fssl 子件数量,stk2.FNUMBER 子件仓库,ae.fscwid 子件仓位
         ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
@@ -356,6 +378,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         INNER JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         INNER join xbt_dataentry ae on a.finnerid = ae.finnerid
         INNER JOIN T_BD_MATERIAL mtl2 ON ae.Fshpid = mtl2.FMATERIALID
         INNER JOIN T_BD_UNIT unt2 ON ae.Fsunit = unt2.FUNITID
@@ -371,7 +395,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 10 调拨申请单-直接调拨单
         /// </summary>
         private const string C_STK_TransferDirect = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid,a.Fspno 调拨申请单号,org.fnumber 调出组织,org2.FNUMBER 调入组织,CASE WHEN oe.FSTOCKORGID = oe.FSTOCKORGINID THEN 'InnerOrgTransfer' ELSE 'OverOrgTransfer' END 调拨类型
-	        ,mtl.FNUMBER 物料编码,a.fssl 调拨数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 调入仓库,a.fscwid 调入仓位,isnull(stk2.fnumber,' ') 调出仓库,a.fsdccwid 调出仓位,a.fspc 批号
+	        ,mtl.FNUMBER 物料编码,a.fssl 调拨数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 调入仓库,ISNULL(F.FNUMBER,'0') 调入仓位,isnull(stk2.fnumber,' ') 调出仓库,ISNULL(F2.FNUMBER,'0') 调出仓位,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
 		INNER JOIN T_STK_STKTRANSFERAPPENTRY oe ON a.Fsentry = oe.FENTRYID
@@ -380,7 +404,11 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
         INNER JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
         INNER JOIN T_BD_STOCK stk2 ON a.fsdcckid = stk2.FSTOCKID
+		LEFT JOIN T_BD_STOCKFLEXITEM sf2 ON stk2.FSTOCKID = sf2.FSTOCKID
+		LEFT JOIN T_BAS_FLEXVALUESENTRY f2 on sf2.FFLEXID = f2.FID
         LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
         LEFT JOIN 
         (
@@ -801,16 +829,52 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         //basedata = new JObject();
                         //basedata.Add("FSTOCKLOCID__FF100007", sp);
                         //entryRow.Add("FStockLocId", basedata);
+                        //string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
+                        //if (cw == "0")
+                        //{
+                        //    cw = "";
+                        //}
+                        //JObject sp = new JObject();
+                        //sp.Add("FNumber", cw);//仓位
+                        //basedata = new JObject();
+                        //basedata.Add("FSTOCKLOCID__FF100007", sp);
+                        //entryRow.Add("FStockLocId", basedata);
+                        //仓位
                         string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
-                        if (cw == "0")
+                        if (cw != "0")
                         {
-                            cw = "";
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
                         }
-                        JObject sp = new JObject();
-                        sp.Add("FNumber", cw);//仓位
-                        basedata = new JObject();
-                        basedata.Add("FSTOCKLOCID__FF100007", sp);
-                        entryRow.Add("FStockLocId", basedata);
 
                         basedata = new JObject();
                         basedata.Add("FNumber", "KCZT01_SYS");
@@ -1053,21 +1117,41 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         entryRow.Add("FStockId", basedata);
 
                         //仓位
-                        //JObject sp = new JObject();
-                        //sp.Add("FNumber", "");//仓位
-                        //basedata = new JObject();
-                        //basedata.Add("FSTOCKLOCID__FF100007", sp);
-                        //entryRow.Add("FStockLocId", basedata);
                         string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
-                        if (cw == "0")
+                        if (cw != "0")
                         {
-                            cw = "";
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
                         }
-                        JObject sp = new JObject();
-                        sp.Add("FNumber", cw);//仓位
-                        basedata = new JObject();
-                        basedata.Add("FSTOCKLOCID__FF100007", sp);
-                        entryRow.Add("FStockLocId", basedata);
 
                         basedata = new JObject();
                         basedata.Add("FNumber", "KCZT01_SYS");
@@ -1322,27 +1406,41 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         entryRow.Add("FStockStatusId", basedata);
 
                         //仓位
-                        //JObject sp = new JObject();
-                        //sp.Add("FNumber", "");//仓位
-                        //basedata = new JObject();
-                        //basedata.Add("FSTOCKLOCID__FF100007", sp);
-                        //entryRow.Add("FStockLocId", basedata);
                         string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
-                        if (cw == "0")
+                        if (cw != "0")
                         {
-                            cw = "";
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
                         }
-                        JObject sp = new JObject();
-                        sp.Add("FNumber", cw);//仓位
-                        basedata = new JObject();
-                        basedata.Add("FSTOCKLOCID__FF100007", sp);
-                        entryRow.Add("FStockLocId", basedata);
-
-                        entryRow.Add("FIsReceiveUpdateStock", false);
-                        entryRow.Add("FGiveAway", false);
-                        entryRow.Add("FBILLINGCLOSE", false);
-                        entryRow.Add("FENTRYTAXRATE", 16.00);
-                        entryRow.Add("FIsStock", false);
 
 
                         //创建与源单之间的关联关系，以支持上查与反写源单
@@ -1560,21 +1658,41 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
 
                         //仓位
-                        //JObject sp = new JObject();
-                        //sp.Add("FNumber", "");//仓位
-                        //basedata = new JObject();
-                        //basedata.Add("FSTOCKLOCID__FF100007", sp);
-                        //entryRow.Add("FStockLocId", basedata);
                         string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
-                        if (cw == "0")
+                        if (cw != "0")
                         {
-                            cw = "";
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
                         }
-                        JObject sp = new JObject();
-                        sp.Add("FNumber", cw);//仓位
-                        basedata = new JObject();
-                        basedata.Add("FSTOCKLOCID__FF100007", sp);
-                        entryRow.Add("FStockLocId", basedata);
 
 
                         //创建与源单之间的关联关系，以支持上查与反写源单
@@ -1792,16 +1910,41 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         entryRow.Add("FIsReturnCheck", false);
 
                         //仓位
-                        //string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
-                        //if (cw == "0")
-                        //{
-                        //    cw = "";
-                        //}
-                        //JObject sp = new JObject();
-                        //sp.Add("FNumber", cw);//仓位
-                        //basedata = new JObject();
-                        //basedata.Add("FSTOCKLOCID__FF100008", sp);
-                        //entryRow.Add("FStockLocId", basedata);
+                        string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
+                        if (cw != "0")
+                        {
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
+                        }
 
 
                         //创建与源单之间的关联关系，以支持上查与反写源单
@@ -1976,6 +2119,44 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         basedata.Add("FNumber", pDataTable.Rows[i]["仓库"].ToString());
                         entryRow.Add("FStockId", basedata);
 
+                        //仓位
+                        string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
+                        if (cw != "0")
+                        {
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
+                        }
+
+
                         entryRow.Add("FISBACKFLUSH", false);
                         basedata = new JObject();
                         basedata.Add("FNumber", pDataTable.Rows[i]["部门"].ToString());
@@ -2000,7 +2181,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         basedata.Add("FNumber", "KCZT01_SYS");
                         entryRow.Add("FStockStatusId", basedata);
                         entryRow.Add("FMOMAINENTRYID", pDataTable.Rows[i]["FENTRYID"].ToString());
-                        
+
                         entryRow.Add("FKeeperTypeId", "BD_KeeperOrg");
                         basedata = new JObject();
                         basedata.Add("FNumber", pDataTable.Rows[i]["货主"].ToString());
@@ -2358,14 +2539,38 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                         //----仓位
                         string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
-                        if (cw != "0" && cw != string.Empty)
+                        if (cw != "0")
                         {
                             JObject sp = new JObject();
-                            sp.Add("FNumber", cw);//仓位
+                            sp.Add("FNumber", cw);
                             basedata = new JObject();
-                            basedata.Add("FSTOCKLOCID__FF100001", sp);
-                            basedata.Add("FSTOCKLOCID__FF100007", sp);
-                            basedata.Add("FSTOCKLOCID__FF100008", sp);
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
                             entryRow.Add("FStockLocId", basedata);
                         }
 
@@ -2542,6 +2747,42 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         basedata = new JObject();
                         basedata.Add("FNumber", pDataTable.Rows[i]["仓库"].ToString());
                         entryRow.Add("FStockId", basedata);
+                        //仓位
+                        string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
+                        if (cw != "0")
+                        {
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
+                        }
 
                         basedata = new JObject();
                         basedata.Add("FNumber", pDataTable.Rows[i]["产品编码"].ToString());
@@ -2735,6 +2976,43 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         entryRow.Add("FSTOCKID", basedata);
                         entryRow.Add("FOWNERTYPEID", "BD_OwnerOrg");
 
+                        //仓位
+                        string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
+                        if (cw != "0")
+                        {
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
+                        }
+
                         basedata = new JObject();
                         basedata.Add("FNumber", pDataTable.Rows[0]["库存组织"].ToString());
                         entryRow.Add("FOWNERID", basedata);
@@ -2868,6 +3146,43 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         basedata.Add("FNumber", pDataTable.Rows[i]["仓库"].ToString());
                         entryRow.Add("FStockId", basedata);
 
+                        //仓位
+                        string cw = pDataTable.Rows[i]["仓位"].ToString().Trim();
+                        if (cw != "0")
+                        {
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
+                        }
+
                         entryRow.Add("FOwnerTypeId", "BD_OwnerOrg");
 
                         basedata = new JObject();
@@ -2984,22 +3299,60 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         //entryRow.Add("FEntryID", 0);
 
                         basedata = new JObject();
-                        basedata.Add("FNumber", pData[i].Rows[i]["物料编码"].ToString());
+                        basedata.Add("FNumber", pData[i].Rows[0]["物料编码"].ToString());
                         entryRow.Add("FMaterialID", basedata);
                         basedata = new JObject();
-                        basedata.Add("FNumber", pData[i].Rows[i]["单位"].ToString());
+                        basedata.Add("FNumber", pData[i].Rows[0]["单位"].ToString());
                         entryRow.Add("FUnitID", basedata);
 
-                        entryRow.Add("FQty", pData[i].Rows[i]["数量"].ToString());
+                        entryRow.Add("FQty", pData[i].Rows[0]["数量"].ToString());
 
                         basedata = new JObject();
-                        basedata.Add("FNumber", pData[i].Rows[i]["仓库"].ToString());
+                        basedata.Add("FNumber", pData[i].Rows[0]["仓库"].ToString());
                         entryRow.Add("FStockID", basedata);
+
+                        //仓位
+                        string cw = pData[i].Rows[0]["仓位"].ToString().Trim();
+                        if (cw != "0")
+                        {
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
+                        }
+
                         basedata = new JObject();
                         basedata.Add("FNumber", "KCZT01_SYS");
                         entryRow.Add("FStockStatusID", basedata);
                         basedata = new JObject();
-                        basedata.Add("FNumber", pData[i].Rows[i]["单位"].ToString());
+                        basedata.Add("FNumber", pData[i].Rows[0]["单位"].ToString());
                         entryRow.Add("FBaseUnitID", basedata);
 
                         entryRow.Add("FOwnerTypeID", "BD_OwnerOrg");
@@ -3008,7 +3361,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         entryRow.Add("FOwnerID", basedata);
                         entryRow.Add("FKeeperTypeID", "BD_KeeperOrg");
                         basedata = new JObject();
-                        basedata.Add("FNumber", pData[i].Rows[i]["货主"].ToString());
+                        basedata.Add("FNumber", pData[i].Rows[0]["货主"].ToString());
                         entryRow.Add("FKeeperID", basedata);
 
                         JArray entrySubRows = new JArray();
@@ -3040,11 +3393,11 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                             entrySubRow.Add("FKeeperTypeIDSETY", "BD_KeeperOrg");
                             basedata = new JObject();
-                            basedata.Add("FNumber", pData[i].Rows[0]["货主"].ToString());
+                            basedata.Add("FNumber", pData[i].Rows[j]["货主"].ToString());
                             entrySubRow.Add("FKeeperIDSETY", basedata);
                             entrySubRow.Add("FOwnerTypeIDSETY", "BD_OwnerOrg");
                             basedata = new JObject();
-                            basedata.Add("FNumber", pData[i].Rows[0]["货主"].ToString());
+                            basedata.Add("FNumber", pData[i].Rows[j]["货主"].ToString());
                             entrySubRow.Add("FOwnerIDSETY", basedata);
 
                             if (i != 0 && j != 0)
@@ -3184,9 +3537,85 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         basedata = new JObject();
                         basedata.Add("FNumber", pDataTable.Rows[i]["调出仓库"].ToString());
                         entryRow.Add("FSrcStockId", basedata);
+
+                        //调出仓位
+                        string cw2 = pDataTable.Rows[i]["调出仓位"].ToString().Trim();
+                        if (cw2 != "0")
+                        {
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw2);
+                            basedata = new JObject();
+                            switch (cw2)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FSrcStockLocId", basedata);
+                        }
+
                         basedata = new JObject();
                         basedata.Add("FNumber", pDataTable.Rows[i]["调入仓库"].ToString());
                         entryRow.Add("FDestStockId", basedata);
+
+                        //调入仓位
+                        string cw = pDataTable.Rows[i]["调入仓位"].ToString().Trim();
+                        if (cw != "0")
+                        {
+                            JObject sp = new JObject();
+                            sp.Add("FNumber", cw);
+                            basedata = new JObject();
+                            switch (cw)
+                            {
+                                case "001":
+                                    basedata.Add("FSTOCKLOCID__FF100007", sp);
+                                    break;
+                                case "002":
+                                    basedata.Add("FSTOCKLOCID__FF100008", sp);
+                                    break;
+                                case "003":
+                                    basedata.Add("FSTOCKLOCID__FF100017", sp);
+                                    break;
+                                case "004":
+                                    basedata.Add("FSTOCKLOCID__FF100018", sp);
+                                    break;
+                                case "005":
+                                    basedata.Add("FSTOCKLOCID__FF100019", sp);
+                                    break;
+                                case "006":
+                                    basedata.Add("FSTOCKLOCID__FF100020", sp);
+                                    break;
+                                case "007":
+                                    basedata.Add("FSTOCKLOCID__FF100022", sp);
+                                    break;
+                                default:
+                                    basedata.Add("FSTOCKLOCID__FF100023", sp);
+                                    break;
+                            }
+                            entryRow.Add("FStockLocId", basedata);
+                        }
+
                         basedata = new JObject();
                         basedata.Add("FNumber", "KCZT01_SYS");
                         entryRow.Add("FSrcStockStatusId", basedata);
