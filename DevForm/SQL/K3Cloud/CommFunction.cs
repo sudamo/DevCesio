@@ -637,7 +637,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
             if (dt == null || dt.Rows.Count == 0)
             {
-                return;
+                goto A;
             }
             switch (pEntity.Fslxbs)
             {
@@ -734,6 +734,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     break;
             }
 
+            A:
             if (billNo.Contains(";Number:"))
                 DelOrders(pEntity.Fskey);//删除执行过的指令
             else

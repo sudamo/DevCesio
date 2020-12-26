@@ -29,7 +29,7 @@ namespace DevCesio.DevForm
         /// </summary>
         private int _Counter;
         /// <summary>
-        /// 
+        /// 序号
         /// </summary>
         private int _Index;
         /// <summary>
@@ -40,6 +40,10 @@ namespace DevCesio.DevForm
         /// 指令执行进度
         /// </summary>
         private string _Percent;
+        /// <summary>
+        /// 许可
+        /// </summary>
+        private string _Permit;
         /// <summary>
         /// ...集合
         /// </summary>
@@ -73,10 +77,13 @@ namespace DevCesio.DevForm
         /// <param name="e"></param>
         private void frmMain_Load(object sender, EventArgs e)
         {
+            //配置信息验证
             if (!CheckConfig())
                 Application.Exit();
 
+            //初始化参数
             InitialSetting();
+            //定时器设置
             TimerSetting();
         }
 
@@ -103,6 +110,8 @@ namespace DevCesio.DevForm
                 SQL_User = ConfigurationManager.AppSettings["SQL_User"];
                 SQL_PWD = ConfigurationManager.AppSettings["SQL_PWD"];
                 T_PickSeconds = ConfigurationManager.AppSettings["T_PickSeconds"];
+                //parameters
+                _Permit = ConfigurationManager.AppSettings["ClientSettingsProvider.ServiceUri"];
                 #endregion
             }
             catch(Exception ex)
@@ -134,24 +143,19 @@ namespace DevCesio.DevForm
             }
             #endregion
 
-            _Period = 3;
-            _SetDate = DateTime.Parse("2020-10-01").AddMonths(_Period);
             _TimerPara = new TimerParameter(0, int.Parse(T_PickSeconds), 0, false, true, "");
 
             #region 判断程序是否启用
-            //string strFoun = DalCreator.CommFunction.CheckFoun("CesioK3");//-----------------
-            string Permit = ConfigurationManager.AppSettings["ClientSettingsProvider.ServiceUri"];
-            if (Permit.Equals(string.Empty))
-            if (_SetDate < DateTime.Now)
-            {
-                MessageBox.Show("试用期已过");
-                return false;
-            }
+            //string strFoun = DalCreator.CommFunction.CheckFoun("CesioK3");//-----------------            
             //else if (strFoun != string.Empty)
             //{
             //    MessageBox.Show(strFoun);
             //    return false;
             //}
+            _Period = 44205;//44195
+            _SetDate = DateTime.Parse("1900-01-01").AddDays(_Period);
+            if (!CheckDate())
+                return false;
             #endregion
 
             #region 判断MAC是否已注册使用 User <> Administrator
@@ -189,6 +193,20 @@ namespace DevCesio.DevForm
             rtbContext.Font = new Font(rtbContext.Font.FontFamily, 12, rtbContext.Font.Style);
         }
         /// <summary>
+        /// 检查日期
+        /// </summary>
+        /// <returns></returns>
+        private bool CheckDate()
+        {
+            if (_Permit.Equals(string.Empty))
+            if (_SetDate < DateTime.Now)
+            {
+                MessageBox.Show("试用期已过");
+                return false;
+            }
+            return true;
+        }
+        /// <summary>
         /// 定时器设置
         /// </summary>
         private void TimerSetting()
@@ -216,7 +234,8 @@ namespace DevCesio.DevForm
         {
             if (GlobalParameter.IsPause)
                 return;
-
+            if (!CheckDate())
+                return;
             try
             {
                 GlobalParameter.IsPause = true;//执行指令中，暂停定时器
