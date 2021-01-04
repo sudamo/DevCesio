@@ -272,10 +272,12 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         private const string C_SALDELIVERYNOTICE_SALOUTSTOCK = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
 	        ,a.fspno 发货通知单号,cus.FNUMBER 客户,org.FNUMBER 发货组织,isnull(dep.fnumber,' ') 发货部门
 	        ,mtl.FNUMBER 物料编码,oe.FQTY - oe.FBASESUMOUTQTY 应发数量,a.fssl 实发数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
+            ,oe.F_SWH_TEXT 订单号,oe.F_SWH_Text2 非标尺寸,oef.FPRICE 单价,oef.FTAXRATE 税率
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
         INNER JOIN T_SAL_DELIVERYNOTICE o ON a.fsid = O.FID
         INNER JOIN T_SAL_DELIVERYNOTICEENTRY oe ON a.Fsentry = oe.FENTRYID
+        INNER JOIN T_SAL_DELIVERYNOTICEENTRY_F oef ON oe.FENTRYID = oef.FENTRYID
         LEFT JOIN T_BD_CUSTOMER cus ON o.FCUSTOMERID = cus.FCUSTID
         LEFT JOIN T_ORG_ORGANIZATIONS org ON o.FDELIVERYORGID = org.FORGID
         LEFT JOIN T_BD_DEPARTMENT dep ON o.FDELIVERYDEPTID = dep.FDEPTID
@@ -813,6 +815,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         {
             string BillNo = string.Empty;
             string fsKeys = string.Empty;
+            Dictionary<string, float> lst = new Dictionary<string, float>();
             try
             {
                 K3CloudApiClient client = new K3CloudApiClient(GlobalParameter.K3Inf.C_ERPADDRESS);
@@ -1025,6 +1028,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         if (i > 0)
                             fsKeys += ",";
                         fsKeys += pDataTable.Rows[i]["fskey"].ToString();
+
+                        lst.Add(pDataTable.Rows[i]["FENTRYID"].ToString(), float.Parse(pDataTable.Rows[i]["入库数量"].ToString()));
                     }
 
                     // 调用Web API接口服务，保存单据
@@ -1046,6 +1051,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                         //反写状态
                         UpdateXBT_DataFSBS(fsKeys);
+                        //反写采购订单关联数量
+                        UpdateT_Pur_Poorderentry_R_QTY(lst);
                     }
                 }
             }
@@ -1064,6 +1071,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         {
             string BillNo = string.Empty;
             string fsKeys = string.Empty;
+            Dictionary<string, float> lst = new Dictionary<string, float>();
             try
             {
                 K3CloudApiClient client = new K3CloudApiClient(GlobalParameter.K3Inf.C_ERPADDRESS);
@@ -1312,6 +1320,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         if (i > 0)
                             fsKeys += ",";
                         fsKeys += pDataTable.Rows[i]["fskey"].ToString();
+
+                        lst.Add(pDataTable.Rows[i]["FENTRYID"].ToString(), float.Parse(pDataTable.Rows[i]["入库数量"].ToString()));
                     }
 
                     // 调用Web API接口服务，保存单据
@@ -1333,6 +1343,9 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                         //反写状态
                         UpdateXBT_DataFSBS(fsKeys);
+
+                        //反写收料通知单入库数量
+                        UpdateT_Pur_ReceiveEntry_S_QTY(lst);
                     }
                 }
             }
@@ -1351,6 +1364,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         {
             string BillNo = string.Empty;
             string fsKeys = string.Empty;
+            Dictionary<string, float> lst = new Dictionary<string, float>();
             try
             {
                 K3CloudApiClient client = new K3CloudApiClient(GlobalParameter.K3Inf.C_ERPADDRESS);
@@ -1582,6 +1596,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         if (i > 0)
                             fsKeys += ",";
                         fsKeys += pDataTable.Rows[i]["fskey"].ToString();
+
+                        lst.Add(pDataTable.Rows[i]["FENTRYID"].ToString(), float.Parse(pDataTable.Rows[i]["实退数量"].ToString()));
                     }
 
                     // 调用Web API接口服务，保存单据
@@ -1603,6 +1619,9 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                         //反写状态
                         UpdateXBT_DataFSBS(fsKeys);
+
+                        //反写采购入库单 关联数量
+                        UpdateT_Stk_instockEntry_QTY(lst);
                     }
                 }
             }
@@ -1621,6 +1640,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         {
             string BillNo = string.Empty;
             string fsKeys = string.Empty;//发货通知单号,客户,发货组织,发货部门,物料编码,应发数量,实发数量,单位,仓库,仓位,批号,操作员,类型,用户,密码,fskey
+            Dictionary<string, float> lst = new Dictionary<string, float>();
             try
             {
                 K3CloudApiClient client = new K3CloudApiClient(GlobalParameter.K3Inf.C_ERPADDRESS);
@@ -1754,6 +1774,9 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         entryRow.Add("FBaseMustQty", decimal.Parse(pDataTable.Rows[i]["应发数量"].ToString()));
 
 
+                        entryRow.Add("FPrice", decimal.Parse(pDataTable.Rows[i]["单价"].ToString()));
+                        //entryRow.Add("FEntryTaxRate", decimal.Parse(pDataTable.Rows[i]["税率"].ToString()));
+
                         //仓位
                         string cw = pDataTable.Rows[i]["FV"].ToString().Trim();
                         if (cw != "0")
@@ -1762,35 +1785,11 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                             sp.Add("FNumber", pDataTable.Rows[i]["仓位"].ToString());
                             basedata = new JObject();
                             basedata.Add("FSTOCKLOCID__FF" + pDataTable.Rows[i]["FVV"].ToString(), sp);
-                            //switch (cw)
-                            //{
-                            //    case "01":
-                            //        basedata.Add("FSTOCKLOCID__FF100007", sp);
-                            //        break;
-                            //    case "02":
-                            //        basedata.Add("FSTOCKLOCID__FF100008", sp);
-                            //        break;
-                            //    case "001":
-                            //        basedata.Add("FSTOCKLOCID__FF100017", sp);
-                            //        break;
-                            //    case "002":
-                            //        basedata.Add("FSTOCKLOCID__FF100018", sp);
-                            //        break;
-                            //    case "003":
-                            //        basedata.Add("FSTOCKLOCID__FF100019", sp);
-                            //        break;
-                            //    case "004":
-                            //        basedata.Add("FSTOCKLOCID__FF100020", sp);
-                            //        break;
-                            //    case "005":
-                            //        basedata.Add("FSTOCKLOCID__FF100022", sp);
-                            //        break;
-                            //    default:
-                            //        basedata.Add("FSTOCKLOCID__FF100023", sp);
-                            //        break;
-                            //}
                             entryRow.Add("FStockLocId", basedata);
                         }
+
+                        entryRow.Add("F_SWH_Text", pDataTable.Rows[i]["订单号"].ToString());
+                        entryRow.Add("F_SWH_Text2", pDataTable.Rows[i]["非标尺寸"].ToString());
 
 
                         //创建与源单之间的关联关系，以支持上查与反写源单
@@ -1834,6 +1833,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         if (i > 0)
                             fsKeys += ",";
                         fsKeys += pDataTable.Rows[i]["fskey"].ToString();
+
+                        lst.Add(pDataTable.Rows[i]["FENTRYID"].ToString(), float.Parse(pDataTable.Rows[i]["实发数量"].ToString()));
                     }
 
                     // 调用Web API接口服务，保存单据
@@ -1855,6 +1856,9 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                         //反写状态
                         UpdateXBT_DataFSBS(fsKeys);
+
+                        //反写发货通知单关联数量
+                        UpdateT_SAL_DELIVERYNOTICEENTRY_QTY(lst);
                     }
                 }
             }
@@ -1873,6 +1877,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         {
             string BillNo = string.Empty;
             string fsKeys = string.Empty;//销售出库单号,客户,销售组织,销售部门,物料编码,数量,实退数量,单位,仓库,仓位,批号,操作员,类型,用户,密码,fskey
+            Dictionary<string, float> lst = new Dictionary<string, float>();
             try
             {
                 K3CloudApiClient client = new K3CloudApiClient(GlobalParameter.K3Inf.C_ERPADDRESS);
@@ -2055,6 +2060,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         if (i > 0)
                             fsKeys += ",";
                         fsKeys += pDataTable.Rows[i]["fskey"].ToString();
+
+                        lst.Add(pDataTable.Rows[i]["FENTRYID"].ToString(), float.Parse(pDataTable.Rows[i]["实退数量"].ToString()));
                     }
 
                     // 调用Web API接口服务，保存单据
@@ -2076,6 +2083,9 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                         //反写状态
                         UpdateXBT_DataFSBS(fsKeys);
+
+                        //反写销售出库关联数量
+                        UpdateT_SAL_OUTSTOCKENTRY_R_QTY(lst);
                     }
                 }
             }
@@ -2094,6 +2104,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         {
             string BillNo = string.Empty;
             string fsKeys = string.Empty;//
+            Dictionary<string, float> lst = new Dictionary<string, float>();
             try
             {
                 K3CloudApiClient client = new K3CloudApiClient(GlobalParameter.K3Inf.C_ERPADDRESS);
@@ -2265,6 +2276,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         if (i > 0)
                             fsKeys += ",";
                         fsKeys += pDataTable.Rows[i]["fskey"].ToString();
+
+                        lst.Add(pDataTable.Rows[i]["FENTRYID"].ToString(), float.Parse(pDataTable.Rows[i]["实收数量"].ToString()));
                     }
 
                     // 调用Web API接口服务，保存单据
@@ -2286,6 +2299,9 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                         //反写状态
                         UpdateXBT_DataFSBS(fsKeys);
+
+                        //反写生产订单关联数量
+                        UpdateT_PRD_MOENTRY_Q_QTY(lst);
                     }
                 }
             }
@@ -2712,6 +2728,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         {
             string BillNo = string.Empty;
             string fsKeys = string.Empty;//
+            Dictionary<string, float> lst = new Dictionary<string, float>();
             try
             {
                 K3CloudApiClient client = new K3CloudApiClient(GlobalParameter.K3Inf.C_ERPADDRESS);
@@ -2859,6 +2876,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         if (i > 0)
                             fsKeys += ",";
                         fsKeys += pDataTable.Rows[i]["fskey"].ToString();
+
+                        lst.Add(pDataTable.Rows[i]["FENTRYID"].ToString(), float.Parse(pDataTable.Rows[i]["实退数量"].ToString()));
                     }
 
                     // 调用Web API接口服务，保存单据
@@ -2880,6 +2899,9 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                         //反写状态
                         UpdateXBT_DataFSBS(fsKeys);
+
+                        //反写生产领料单
+                        UpdateT_PRD_PICKMTRLDATA_QTY(lst);
                     }
                 }
             }
@@ -3706,6 +3728,95 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string sql = string.Format("DELETE FROM xbt_uporder WHERE fskey = {0}", pfskey.ToString());
             SQLHelper.ExecuteNonQuery(sql);
         }
+        //----------------------------------------------
+
+        /// <summary>
+        /// 采购入库成功 反写采购订单关联数量
+        /// </summary>
+        /// <param name="pList"></param>
+        private void UpdateT_Pur_Poorderentry_R_QTY(Dictionary<string, float> pList)
+        {
+            string sql = string.Empty;
+            foreach (KeyValuePair<string, float> lst in pList)
+            {
+                sql += string.Format(" UPDATE t_pur_poorderentry_r SET FSTOCKINQTY = FSTOCKINQTY + {1},FBASESTOCKINQTY = FBASESTOCKINQTY + {1},FSTOCKBASESTOCKINQTY = FSTOCKBASESTOCKINQTY + {1},FJOINQTY = FJOINQTY + {1},FBASEJOINQTY = FBASEJOINQTY + {1},FREMAINSTOCKINQTY = FREMAINSTOCKINQTY - {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            }
+
+            SQLHelper.ExecuteNonQuery(sql);
+        }
+        /// <summary>
+        /// 采购入库成功 反写收料通知单入库数量
+        /// </summary>
+        /// <param name="pList"></param>
+        private void UpdateT_Pur_ReceiveEntry_S_QTY(Dictionary<string, float> pList)
+        {
+            string sql = string.Empty;
+            foreach (KeyValuePair<string, float> lst in pList)
+            {
+                sql += string.Format(" UPDATE T_PUR_ReceiveEntry_s SET FINSTOCKQTY = FINSTOCKQTY + {1},FINSTOCKBASEQTY = FINSTOCKBASEQTY + {1},FJOINBASEQTY = FJOINBASEQTY - {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            }
+
+            SQLHelper.ExecuteNonQuery(sql);
+        }
+        /// <summary>
+        /// 采购退料成功 反写采购入库单关联数量
+        /// </summary>
+        /// <param name="pList"></param>
+        private void UpdateT_Stk_instockEntry_QTY(Dictionary<string, float> pList)
+        {
+            string sql = string.Empty;
+            foreach (KeyValuePair<string, float> lst in pList)
+            {
+                sql += string.Format(" UPDATE T_Stk_InstockEntry SET FRETURNJOINQTY = FRETURNJOINQTY + {1},FBASERETURNJOINQTY = FBASERETURNJOINQTY + {1},FBASEJOINQTY = FBASEJOINQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            }
+
+            SQLHelper.ExecuteNonQuery(sql);
+        }
+        /// <summary>
+        /// 销售出库成功 反写发货通知单关联数量
+        /// </summary>
+        /// <param name="pList"></param>
+        private void UpdateT_SAL_DELIVERYNOTICEENTRY_QTY(Dictionary<string, float> pList)
+        {
+            string sql = string.Empty;
+            foreach (KeyValuePair<string, float> lst in pList)
+            {
+                sql += string.Format(" UPDATE T_SAL_DELIVERYNOTICEENTRY SET FJOINOUTQTY = FJOINOUTQTY + {1},FBASEJOINOUTQTY = FBASEJOINOUTQTY + {1},FSUMOUTQTY = FSUMOUTQTY + {1},FBASESUMOUTQTY = FBASESUMOUTQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+                sql += string.Format(" UPDATE T_SAL_DELIVERYNOTICEENTRY_E SET FSTOCKBASEJOINOUTQTY = FSTOCKBASEJOINOUTQTY + {1},FSTOCKBASESUMOUTQTY = FSTOCKBASESUMOUTQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            }
+
+            SQLHelper.ExecuteNonQuery(sql);
+        }
+        /// <summary>
+        /// 销售退货成功 反写销售出库单关联数量
+        /// </summary>
+        /// <param name="pList"></param>
+        private void UpdateT_SAL_OUTSTOCKENTRY_R_QTY(Dictionary<string, float> pList)
+        {
+            string sql = string.Empty;
+            foreach (KeyValuePair<string, float> lst in pList)
+            {
+                sql += string.Format(" UPDATE T_SAL_OUTSTOCKENTRY_R SET FRETURNQTY = FRETURNQTY + {1},FBASERETURNQTY = FBASERETURNQTY + {1},FSTOCKBASERETURNQTY = FSTOCKBASERETURNQTY + {1},FSUMRETSTOCKQTY = FSUMRETSTOCKQTY + {1},FBASESUMRETSTOCKQTY = FBASESUMRETSTOCKQTY + {1},FSTOCKBASESUMRETSTOCKQTY = FSTOCKBASESUMRETSTOCKQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            }
+
+            SQLHelper.ExecuteNonQuery(sql);
+        }
+        /// <summary>
+        /// 生产入库成功 反写生产订单关联数量
+        /// </summary>
+        /// <param name="pList"></param>
+        private void UpdateT_PRD_MOENTRY_Q_QTY(Dictionary<string, float> pList)
+        {
+            string sql = string.Empty;
+            foreach (KeyValuePair<string, float> lst in pList)
+            {
+                sql += string.Format(" UPDATE T_PRD_MOENTRY_A SET FSTOCKINQUAAUXQTY = FSTOCKINQUAAUXQTY + {1},FSTOCKINQUAQTY = FSTOCKINQUAQTY + {1},FSTOCKINQUASELAUXQTY = FSTOCKINQUASELAUXQTY + {1},FSTOCKINQUASELQTY = FSTOCKINQUASELQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+                sql += string.Format(" UPDATE T_PRD_MOENTRY_Q SET FNOSTOCKINQTY = FNOSTOCKINQTY - {1},FBASENOSTOCKINQTY = FBASENOSTOCKINQTY - {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            }
+
+            SQLHelper.ExecuteNonQuery(sql);
+        }
+
         /// <summary>
         /// 生产领料领料成功 反写生产用料清单已领数量
         /// </summary>
@@ -3715,8 +3826,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string sql = string.Empty;
             foreach (KeyValuePair<string, float> lst in pList)
             {
-                sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {0} WHERE FENTRYID = {1} ", lst.Key, lst.Value);
+                sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {1},FBASEPICKEDQTY = FBASEPICKEDQTY + {1},FNOPICKEDQTY = FNOPICKEDQTY - {1},FBASENOPICKEDQTY = FBASENOPICKEDQTY - {1},FSELPICKEDQTY = FSELPICKEDQTY + {1},FBASESELPICKEDQTY = FBASESELPICKEDQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
             }
+
+            SQLHelper.ExecuteNonQuery(sql);
         }
         /// <summary>
         /// 生产领料成功 反写生产订单 领料状态
@@ -3725,6 +3838,20 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         private void UpdateMoEntry_Q_FPICKMTRLSTATUS(string pmoentryids)
         {
             string sql = string.Format("UPDATE A SET FPICKMTRLSTATUS = CASE WHEN PQ.FPICKEDQTY = 0 THEN 1 WHEN PE.FMUSTQTY > PQ.FPICKEDQTY THEN 2 WHEN PE.FMUSTQTY = PQ.FPICKEDQTY THEN 3 ELSE 4 END FROM T_PRD_MOENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY PE ON PE.FMOENTRYID = A.FENTRYID INNER JOIN T_PRD_PPBOMENTRY_Q PQ ON PE.FENTRYID = PQ.FENTRYID WHERE A.FENTRYID IN({0})", pmoentryids);
+            SQLHelper.ExecuteNonQuery(sql);
+        }
+        /// <summary>
+        /// 生产退料成功 反写生产领料单关联数量
+        /// </summary>
+        /// <param name="pList"></param>
+        private void UpdateT_PRD_PICKMTRLDATA_QTY(Dictionary<string, float> pList)
+        {
+            string sql = string.Empty;
+            foreach (KeyValuePair<string, float> lst in pList)
+            {
+                sql += string.Format(" UPDATE T_PRD_PICKMTRLDATA SET FSELPRCDRETURNQTY = FSELPRCDRETURNQTY + {1},FBASESELPRCDRETURNQTY = FBASESELPRCDRETURNQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            }
+
             SQLHelper.ExecuteNonQuery(sql);
         }
         /// <summary>
