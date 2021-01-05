@@ -54,150 +54,11 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         WHERE d.fskey IS NULL
         )
         SELECT DISTINCT fscjqh,fslxbs,fsuser,fspwd FROM xbt_uporder WITH(TABLOCK) WHERE flag = 0";
-        /*
-        /// <summary>
-        /// V1 是否有视图
-        /// </summary>
-        private const string C_CheckViews = @"
-        IF OBJECT_ID('DM_PurInstockView','V') IS NOT NULL
-        DROP VIEW [DM_PurInstockView]
-        IF OBJECT_ID('DM_PurInstockRecView','V') IS NOT NULL
-        DROP VIEW [DM_PurInstockRecView]
-        IF OBJECT_ID('DM_PurInstockMrbView','V') IS NOT NULL
-        DROP VIEW [DM_PurInstockMrbView]
-        IF OBJECT_ID('DM_SalOutStockDelView','V') IS NOT NULL
-        DROP VIEW [DM_SalOutStockDelView]
-        IF OBJECT_ID('DM_SalReturnStockOutView','V') IS NOT NULL
-        DROP VIEW [DM_SalReturnStockOutView]";
-        /// <summary>
-        /// V2 创建视图DM_PurInstockView
-        /// </summary>
-        private const string C_CreateView_DM_PurInstockView = @"CREATE VIEW [dbo].[DM_PurInstockView]
-        AS
-        SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
-	        ,a.fspno 采购订单号,org.FNUMBER 收料组织,isnull(dep.fnumber,' ') 收料部门,isnull(sup.FNUMBER,' ') 供应商,isnull(org2.fnumber,'') 货主
-	        ,mtl.FNUMBER 物料编码,oe.FQTY 采购数量,oer.FREMAINSTOCKINQTY 剩余入库数量,a.fssl 入库数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
-	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
-        FROM xbt_data a
-        INNER JOIN  T_PUR_POORDERENTRY oe ON a.Fsentry = oe.FENTRYID
-        INNER JOIN  T_PUR_POORDERENTRY_R oer ON oe.FENTRYID = oer.FENTRYID
-        LEFT JOIN T_ORG_ORGANIZATIONS org ON a.Forgid = org.FORGID
-        LEFT JOIN T_ORG_ORGANIZATIONS org2 ON a.fownerid = org2.FORGID
-        LEFT JOIN T_BD_DEPARTMENT dep ON a.FsDepartid = dep.FDEPTID
-        LEFT JOIN T_BD_SUPPLIER sup ON a.fsgysbh = sup.FSUPPLIERID
-        INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
-        INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
-        LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
-		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
-		LEFT JOIN T_BAS_FLEXVALUES fv ON sf.FFLEXID = FV.FID
-		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
-        LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
-        LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
-        WHERE a.fsbs = 0 AND a.fsrklx = 11";
-        /// <summary>
-        /// V3 创建视图DM_PurInstockRecView
-        /// </summary>
-        private const string C_CreateView_DM_PurInstockRecView = @"CREATE VIEW [dbo].[DM_PurInstockRecView]
-        AS
-        SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
-	        ,a.fspno 收料通知单号,org.FNUMBER 收料组织,isnull(dep.fnumber,' ') 收料部门,isnull(sup.FNUMBER,' ') 供应商,isnull(org2.fnumber,'') 货主
-	        ,mtl.FNUMBER 物料编码,oe.FACTRECEIVEQTY 交货数量,oe.FACTRECEIVEQTY - oes.FINSTOCKQTY 剩余入库数量,a.fssl 入库数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
-	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
-        FROM xbt_data a
-        INNER JOIN  T_PUR_RECEIVEENTRY oe ON a.Fsentry = oe.FENTRYID
-        INNER JOIN  T_PUR_RECEIVEENTRY_s oes ON oe.FENTRYID = oes.FENTRYID
-        LEFT JOIN T_ORG_ORGANIZATIONS org ON a.Forgid = org.FORGID
-        LEFT JOIN T_ORG_ORGANIZATIONS org2 ON a.fownerid = org2.FORGID
-        LEFT JOIN T_BD_DEPARTMENT dep ON a.FsDepartid = dep.FDEPTID
-        LEFT JOIN T_BD_SUPPLIER sup ON a.fsgysbh = sup.FSUPPLIERID
-        INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
-        INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
-        LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
-		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
-		LEFT JOIN T_BAS_FLEXVALUES fv ON sf.FFLEXID = FV.FID
-		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
-        LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
-        LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
-        WHERE a.fsbs = 0 AND a.fsrklx = 1";
-        /// <summary>
-        /// V4 创建视图DM_PurInstockMrbView
-        /// </summary>
-        private const string C_CreateView_DM_PurInstockMrbView = @"CREATE VIEW [dbo].[DM_PurInstockMrbView]
-        AS
-        SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
-	        ,a.fspno 采购入库单号,org.FNUMBER 退料组织,isnull(dep.fnumber,' ') 退料部门,isnull(sup.FNUMBER,' ') 供应商,isnull(org2.fnumber,'') 货主
-	        ,mtl.FNUMBER 物料编码,oe.FMUSTQTY 应收数量,oe.FREALQTY 实收数量,a.fssl 实退数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
-	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
-        FROM xbt_data a
-        INNER JOIN  T_STK_INSTOCKENTRY oe ON a.Fsentry = oe.FENTRYID
-        LEFT JOIN T_ORG_ORGANIZATIONS org ON a.Forgid = org.FORGID
-        LEFT JOIN T_ORG_ORGANIZATIONS org2 ON a.fownerid = org2.FORGID
-        LEFT JOIN T_BD_DEPARTMENT dep ON a.FsDepartid = dep.FDEPTID
-        LEFT JOIN T_BD_SUPPLIER sup ON a.fsgysbh = sup.FSUPPLIERID
-        INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
-        INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
-        LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
-		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
-		LEFT JOIN T_BAS_FLEXVALUES fv ON sf.FFLEXID = FV.FID
-		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
-        LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
-        LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
-        WHERE a.fsbs = 0 AND a.fsrklx = 9";
-        /// <summary>
-        /// V5 创建视图DM_SalOutStockDelView
-        /// </summary>
-        private const string C_CreateView_DM_SalOutStockDelView = @"CREATE VIEW [dbo].[DM_SalOutStockDelView]
-        AS
-        SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
-	        ,a.fspno 发货通知单号,cus.FNUMBER 客户,org.FNUMBER 发货组织,isnull(dep.fnumber,' ') 发货部门
-	        ,mtl.FNUMBER 物料编码,oe.FQTY - oe.FBASESUMOUTQTY 应发数量,a.fssl 实发数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
-	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
-        FROM xbt_data a
-        INNER JOIN T_SAL_DELIVERYNOTICE o ON a.fsid = O.FID
-        INNER JOIN T_SAL_DELIVERYNOTICEENTRY oe ON a.Fsentry = oe.FENTRYID
-        LEFT JOIN T_BD_CUSTOMER cus ON o.FCUSTOMERID = cus.FCUSTID
-        LEFT JOIN T_ORG_ORGANIZATIONS org ON o.FDELIVERYORGID = org.FORGID
-        LEFT JOIN T_BD_DEPARTMENT dep ON o.FDELIVERYDEPTID = dep.FDEPTID
-        INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
-        INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
-        LEFT JOIN T_BD_STOCK stk ON a.fsckid = stk.FSTOCKID
-		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
-		LEFT JOIN T_BAS_FLEXVALUES fv ON sf.FFLEXID = FV.FID
-		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
-        LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
-        LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
-        WHERE a.fsbs = 0 AND a.fsrklx = 7";
-        /// <summary>
-        /// V6 创建视图DM_SalReturnStockOutView
-        /// </summary>
-        private const string C_CreateView_DM_SalReturnStockOutView = @"CREATE VIEW [dbo].[DM_SalReturnStockOutView]
-        AS
-        SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
-	        ,a.fspno 销售出库单号,cus.FNUMBER 客户,org.FNUMBER 销售组织,isnull(dep.fnumber,' ') 销售部门
-	        ,mtl.FNUMBER 物料编码,oe.FMUSTQTY 数量,a.fssl 实退数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
-	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
-        FROM xbt_data a
-        INNER JOIN T_SAL_OUTSTOCK o ON a.fsid = O.FID
-        INNER JOIN T_SAL_OUTSTOCKENTRY oe ON a.Fsentry = oe.FENTRYID
-        LEFT JOIN T_BD_CUSTOMER cus ON o.FCUSTOMERID = cus.FCUSTID
-        LEFT JOIN T_ORG_ORGANIZATIONS org ON a.Forgid = org.FORGID
-        LEFT JOIN T_BD_DEPARTMENT dep ON o.FDELIVERYDEPTID = dep.FDEPTID
-        INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
-        INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
-        LEFT JOIN T_BD_STOCK stk ON oe.FSTOCKID = stk.FSTOCKID
-		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
-		LEFT JOIN T_BAS_FLEXVALUES fv ON sf.FFLEXID = FV.FID
-		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
-        LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
-        LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
-        WHERE a.fsbs = 0 AND a.fsrklx = 4";
-        */
         #endregion
 
         /// <summary>
         /// 1 收料通知单-采购入库
         /// </summary>
-        //private const string C_PURReceiveBill_STKInStock = "SELECT FID,FENTRYID,FORGID,'收料通知-采购入库' 类型,收料通知单号,供应商,物料编码,交货数量,剩余入库数量,入库数量,单位,仓库,FV,仓位,收料组织,收料部门,批号,操作员,货主,用户,密码,fskey FROM DM_PurInstockRecView";
         private const string C_PURReceiveBill_STKInStock = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
 	        ,a.fspno 收料通知单号,org.FNUMBER 收料组织,isnull(dep.fnumber,' ') 收料部门,isnull(sup.FNUMBER,' ') 供应商,isnull(org2.fnumber,'') 货主
 	        ,mtl.FNUMBER 物料编码,oe.FACTRECEIVEQTY 交货数量,oe.FACTRECEIVEQTY - oes.FINSTOCKQTY 剩余入库数量,a.fssl 入库数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
@@ -221,7 +82,6 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <summary>
         /// 11 采购订单-采购入库
         /// </summary>
-        //private const string C_PURPurchaseOrder_STKInStock = "SELECT FID,FENTRYID,FORGID,'采购订单-采购入库' 类型,采购订单号,供应商,物料编码,采购数量,剩余入库数量,入库数量,单位,仓库,FV,仓位,收料组织,收料部门,批号,操作员,货主,用户,密码,fskey FROM DM_PurInstockView";
         private const string C_PURPurchaseOrder_STKInStock = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
 	        ,a.fspno 采购订单号,org.FNUMBER 收料组织,isnull(dep.fnumber,' ') 收料部门,isnull(sup.FNUMBER,' ') 供应商,isnull(org2.fnumber,'') 货主
 	        ,mtl.FNUMBER 物料编码,oe.FQTY 采购数量,oer.FREMAINSTOCKINQTY 剩余入库数量,a.fssl 入库数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
@@ -245,7 +105,6 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <summary>
         /// 9 采购入库单-采购退料单
         /// </summary>
-        //private const string C_STKInStock_PUR_MRB = "SELECT FID,FENTRYID,FORGID,'采购入库-采购退料' 类型,采购入库单号,供应商,物料编码,应收数量,实收数量,实退数量,单位,仓库,FV,仓位,退料组织,退料部门,批号,操作员,货主,用户,密码,fskey FROM DM_PurInstockMrbView";
         private const string C_STKInStock_PUR_MRB = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid,'采购入库-采购退料' 类型
 	        ,a.fspno 采购入库单号,org.FNUMBER 退料组织,isnull(dep.fnumber,' ') 退料部门,isnull(sup.FNUMBER,' ') 供应商,isnull(org2.fnumber,'') 货主
 	        ,mtl.FNUMBER 物料编码,oe.FMUSTQTY 应收数量,oe.FREALQTY 实收数量,a.fssl 实退数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
@@ -268,11 +127,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <summary>
         /// 7 发货通知单-销售出库
         /// </summary>
-        //private const string C_SALDELIVERYNOTICE_SALOUTSTOCK = "SELECT FID,FENTRYID,FORGID,'发货通知单-销售出库' 类型,发货通知单号,客户,发货组织,发货部门,物料编码,应发数量,实发数量,单位,仓库,FV,仓位,批号,操作员,用户,密码,fskey FROM DM_SalOutStockDelView";
         private const string C_SALDELIVERYNOTICE_SALOUTSTOCK = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
 	        ,a.fspno 发货通知单号,cus.FNUMBER 客户,org.FNUMBER 发货组织,isnull(dep.fnumber,' ') 发货部门
 	        ,mtl.FNUMBER 物料编码,oe.FQTY - oe.FBASESUMOUTQTY 应发数量,a.fssl 实发数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
-            ,oe.F_SWH_TEXT 订单号,oe.F_SWH_Text2 非标尺寸,oef.FPRICE 单价,oef.FTAXRATE 税率
+            ,ISNULL(oe.F_SWH_TEXT,'') 订单号,ISNULL(oe.F_SWH_Text2,'') 非标尺寸,CONVERT(DECIMAL(18,4),oef.FPRICE) 单价,CONVERT(DECIMAL(18,2),oef.FTAXRATE) 税率
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
         INNER JOIN T_SAL_DELIVERYNOTICE o ON a.fsid = O.FID
@@ -293,7 +151,6 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <summary>
         /// 4 销售出库-销售退货
         /// </summary>
-        //private const string C_SALOUTSTOCK_SALRETURNSTOCK = "SELECT FID,FENTRYID,FORGID,'销售出库-销售退货' 类型,销售出库单号,客户,销售组织,销售部门,物料编码,数量,实退数量,单位,仓库,FV,仓位,批号,操作员,用户,密码,fskey FROM DM_SalReturnStockOutView";
         private const string C_SALOUTSTOCK_SALRETURNSTOCK = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
 	        ,a.fspno 销售出库单号,cus.FNUMBER 客户,org.FNUMBER 销售组织,isnull(dep.fnumber,' ') 销售部门
 	        ,mtl.FNUMBER 物料编码,oe.FMUSTQTY 数量,a.fssl 实退数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
@@ -553,6 +410,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         {
             return SQLHelper.ConnectionChecked(pConnectionString);
         }
+        public DateTime GetDateTime()
+        {
+            return (DateTime)SQLHelper.ExecuteScalar("SELECT CONVERT(DATETIME,0)");
+        }
         /// <summary>
         /// K3Cloud登陆验证
         /// </summary>
@@ -611,12 +472,6 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             SQLHelper.ExecuteNonQuery(C_CreateTable);
             SQLHelper.ExecuteNonQuery(C_CheckProcedure);
             SQLHelper.ExecuteNonQuery(C_CreateProcedure);
-            //SQLHelper.ExecuteNonQuery(C_CheckViews);
-            //SQLHelper.ExecuteNonQuery(C_CreateView_DM_PurInstockView);
-            //SQLHelper.ExecuteNonQuery(C_CreateView_DM_PurInstockRecView);
-            //SQLHelper.ExecuteNonQuery(C_CreateView_DM_PurInstockMrbView);
-            //SQLHelper.ExecuteNonQuery(C_CreateView_DM_SalOutStockDelView);
-            //SQLHelper.ExecuteNonQuery(C_CreateView_DM_SalReturnStockOutView);
         }
         /// <summary>
         /// 获取指令
@@ -883,8 +738,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     basedata = new JObject();
                     basedata.Add("FNumber", pDataTable.Rows[0]["收料组织"].ToString());
                     model.Add("FOwnerIdHead", basedata);
-
-                    //model.Add("F_asd_Suppliershort", "HYG");
+                    
                     model.Add("FSupplierBillNo", "1");
 
 
@@ -1212,41 +1066,6 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         entryRow.Add("FStockId", basedata);
 
                         //仓位
-                        //string cw = pDataTable.Rows[i]["FV"].ToString().Trim();
-                        //if (cw != "0")
-                        //{
-                        //    JObject sp = new JObject();
-                        //    sp.Add("FNumber", pDataTable.Rows[i]["仓位"].ToString());
-                        //    basedata = new JObject();
-                        //    switch (cw)
-                        //    {
-                        //        case "01":
-                        //            basedata.Add("FSTOCKLOCID__FF100007", sp);
-                        //            break;
-                        //        case "02":
-                        //            basedata.Add("FSTOCKLOCID__FF100008", sp);
-                        //            break;
-                        //        case "001":
-                        //            basedata.Add("FSTOCKLOCID__FF100017", sp);
-                        //            break;
-                        //        case "002":
-                        //            basedata.Add("FSTOCKLOCID__FF100018", sp);
-                        //            break;
-                        //        case "003":
-                        //            basedata.Add("FSTOCKLOCID__FF100019", sp);
-                        //            break;
-                        //        case "004":
-                        //            basedata.Add("FSTOCKLOCID__FF100020", sp);
-                        //            break;
-                        //        case "005":
-                        //            basedata.Add("FSTOCKLOCID__FF100022", sp);
-                        //            break;
-                        //        default:
-                        //            basedata.Add("FSTOCKLOCID__FF100023", sp);
-                        //            break;
-                        //    }
-                        //    entryRow.Add("FStockLocId", basedata);
-                        //}
                         string cw = pDataTable.Rows[i]["FV"].ToString().Trim();
                         if (cw != "0")
                         {
@@ -1523,33 +1342,6 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                             sp.Add("FNumber", pDataTable.Rows[i]["仓位"].ToString());
                             basedata = new JObject();
                             basedata.Add("FSTOCKLOCID__FF" + pDataTable.Rows[i]["FVV"].ToString(), sp);
-                            //switch (cw)
-                            //{
-                            //    case "01":
-                            //        basedata.Add("FSTOCKLOCID__FF100007", sp);
-                            //        break;
-                            //    case "02":
-                            //        basedata.Add("FSTOCKLOCID__FF100008", sp);
-                            //        break;
-                            //    case "001":
-                            //        basedata.Add("FSTOCKLOCID__FF100017", sp);
-                            //        break;
-                            //    case "002":
-                            //        basedata.Add("FSTOCKLOCID__FF100018", sp);
-                            //        break;
-                            //    case "003":
-                            //        basedata.Add("FSTOCKLOCID__FF100019", sp);
-                            //        break;
-                            //    case "004":
-                            //        basedata.Add("FSTOCKLOCID__FF100020", sp);
-                            //        break;
-                            //    case "005":
-                            //        basedata.Add("FSTOCKLOCID__FF100022", sp);
-                            //        break;
-                            //    default:
-                            //        basedata.Add("FSTOCKLOCID__FF100023", sp);
-                            //        break;
-                            //}
                             entryRow.Add("FStockLocId", basedata);
                         }
 
@@ -3294,33 +3086,6 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                             sp.Add("FNumber", pData[i].Rows[0]["仓位"].ToString());
                             basedata = new JObject();
                             basedata.Add("FSTOCKLOCID__FF" + pData[i].Rows[0]["FVV"].ToString(), sp);
-                            //switch (cw)
-                            //{
-                            //    case "01":
-                            //        basedata.Add("FSTOCKLOCID__FF100007", sp);
-                            //        break;
-                            //    case "02":
-                            //        basedata.Add("FSTOCKLOCID__FF100008", sp);
-                            //        break;
-                            //    case "001":
-                            //        basedata.Add("FSTOCKLOCID__FF100017", sp);
-                            //        break;
-                            //    case "002":
-                            //        basedata.Add("FSTOCKLOCID__FF100018", sp);
-                            //        break;
-                            //    case "003":
-                            //        basedata.Add("FSTOCKLOCID__FF100019", sp);
-                            //        break;
-                            //    case "004":
-                            //        basedata.Add("FSTOCKLOCID__FF100020", sp);
-                            //        break;
-                            //    case "005":
-                            //        basedata.Add("FSTOCKLOCID__FF100022", sp);
-                            //        break;
-                            //    default:
-                            //        basedata.Add("FSTOCKLOCID__FF100023", sp);
-                            //        break;
-                            //}
                             entryRow.Add("FStockLocId", basedata);
                         }
 
@@ -3368,33 +3133,6 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                                 sp2.Add("FNumber", pData[i].Rows[j]["子件仓位"].ToString());
                                 basedata = new JObject();
                                 basedata.Add("FSTOCKLOCIDSETY__FF" + pData[i].Rows[j]["FVV2"].ToString(), sp2);
-                                //switch (cw2)
-                                //{
-                                //    case "01":
-                                //        basedata.Add("FSTOCKLOCIDSETY__FF100007", sp2);
-                                //        break;
-                                //    case "02":
-                                //        basedata.Add("FSTOCKLOCIDSETY__FF100008", sp2);
-                                //        break;
-                                //    case "001":
-                                //        basedata.Add("FSTOCKLOCIDSETY__FF100017", sp2);
-                                //        break;
-                                //    case "002":
-                                //        basedata.Add("FSTOCKLOCIDSETY__FF100018", sp2);
-                                //        break;
-                                //    case "003":
-                                //        basedata.Add("FSTOCKLOCIDSETY__FF100019", sp2);
-                                //        break;
-                                //    case "004":
-                                //        basedata.Add("FSTOCKLOCIDSETY__FF100020", sp2);
-                                //        break;
-                                //    case "005":
-                                //        basedata.Add("FSTOCKLOCIDSETY__FF100022", sp2);
-                                //        break;
-                                //    default:
-                                //        basedata.Add("FSTOCKLOCIDSETY__FF100023", sp2);
-                                //        break;
-                            //}
                                 entrySubRow.Add("FStockLocIdSETY", basedata);
                             }
 
@@ -3728,6 +3466,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string sql = string.Format("DELETE FROM xbt_uporder WHERE fskey = {0}", pfskey.ToString());
             SQLHelper.ExecuteNonQuery(sql);
         }
+
         //----------------------------------------------
 
         /// <summary>
@@ -3739,7 +3478,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string sql = string.Empty;
             foreach (KeyValuePair<string, float> lst in pList)
             {
-                sql += string.Format(" UPDATE t_pur_poorderentry_r SET FSTOCKINQTY = FSTOCKINQTY + {1},FBASESTOCKINQTY = FBASESTOCKINQTY + {1},FSTOCKBASESTOCKINQTY = FSTOCKBASESTOCKINQTY + {1},FJOINQTY = FJOINQTY + {1},FBASEJOINQTY = FBASEJOINQTY + {1},FREMAINSTOCKINQTY = FREMAINSTOCKINQTY - {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+                sql += string.Format(" UPDATE t_pur_poorderentry_r SET FSTOCKINQTY = FSTOCKINQTY + {1},FBASESTOCKINQTY = FBASESTOCKINQTY + {1},FSTOCKBASESTOCKINQTY = FSTOCKBASESTOCKINQTY + {1},FJOINQTY = FJOINQTY + {1},FBASEJOINQTY = FBASEJOINQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);//,FREMAINSTOCKINQTY = FREMAINSTOCKINQTY - {1}
             }
 
             SQLHelper.ExecuteNonQuery(sql);
@@ -3753,7 +3492,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string sql = string.Empty;
             foreach (KeyValuePair<string, float> lst in pList)
             {
-                sql += string.Format(" UPDATE T_PUR_ReceiveEntry_s SET FINSTOCKQTY = FINSTOCKQTY + {1},FINSTOCKBASEQTY = FINSTOCKBASEQTY + {1},FJOINBASEQTY = FJOINBASEQTY - {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+                sql += string.Format(" UPDATE T_PUR_ReceiveEntry_s SET FINSTOCKQTY = FINSTOCKQTY + {1},FINSTOCKBASEQTY = FINSTOCKBASEQTY + {1},FJOINBASEQTY = FJOINBASEQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
             }
 
             SQLHelper.ExecuteNonQuery(sql);
@@ -3811,7 +3550,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             foreach (KeyValuePair<string, float> lst in pList)
             {
                 sql += string.Format(" UPDATE T_PRD_MOENTRY_A SET FSTOCKINQUAAUXQTY = FSTOCKINQUAAUXQTY + {1},FSTOCKINQUAQTY = FSTOCKINQUAQTY + {1},FSTOCKINQUASELAUXQTY = FSTOCKINQUASELAUXQTY + {1},FSTOCKINQUASELQTY = FSTOCKINQUASELQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
-                sql += string.Format(" UPDATE T_PRD_MOENTRY_Q SET FNOSTOCKINQTY = FNOSTOCKINQTY - {1},FBASENOSTOCKINQTY = FBASENOSTOCKINQTY - {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+                //sql += string.Format(" UPDATE T_PRD_MOENTRY_Q SET FNOSTOCKINQTY = FNOSTOCKINQTY - {1},FBASENOSTOCKINQTY = FBASENOSTOCKINQTY - {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
             }
 
             SQLHelper.ExecuteNonQuery(sql);
@@ -3826,7 +3565,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string sql = string.Empty;
             foreach (KeyValuePair<string, float> lst in pList)
             {
-                sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {1},FBASEPICKEDQTY = FBASEPICKEDQTY + {1},FNOPICKEDQTY = FNOPICKEDQTY - {1},FBASENOPICKEDQTY = FBASENOPICKEDQTY - {1},FSELPICKEDQTY = FSELPICKEDQTY + {1},FBASESELPICKEDQTY = FBASESELPICKEDQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+                sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {1},FBASEPICKEDQTY = FBASEPICKEDQTY + {1},FSELPICKEDQTY = FSELPICKEDQTY + {1},FBASESELPICKEDQTY = FBASESELPICKEDQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);//,FNOPICKEDQTY = FNOPICKEDQTY - {1},FBASENOPICKEDQTY = FBASENOPICKEDQTY - {1}
             }
 
             SQLHelper.ExecuteNonQuery(sql);

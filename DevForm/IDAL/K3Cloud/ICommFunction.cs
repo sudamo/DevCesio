@@ -8,6 +8,7 @@ namespace DevCesio.DevForm.IDAL.K3Cloud
     {
         string Userlog(string pUrl, string pZTID, string pUser, string pPWD);
         string CheckedConnection(string pConnectionString);
+        DateTime GetDateTime();
         string CheckFoun(string pFormId);
         void SetSql();
         //DataTable GetAllNavigation();

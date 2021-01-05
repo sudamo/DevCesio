@@ -152,8 +152,9 @@ namespace DevCesio.DevForm
             //    MessageBox.Show(strFoun);
             //    return false;
             //}
-            _Period = 44205;//44195
-            _SetDate = DateTime.Parse("1900-01-01").AddDays(_Period);
+            _Period = 44226;
+            //_SetDate = DateTime.Parse("1900-01-01").AddDays(_Period);
+            _SetDate = DalCreator.CommFunction.GetDateTime().AddDays(_Period);
             if (!CheckDate())
                 return false;
             #endregion
