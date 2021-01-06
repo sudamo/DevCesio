@@ -894,7 +894,9 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -903,8 +905,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "STK_InStock", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据入库单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "STK_InStock", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据入库单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
                         //反写采购订单关联数量
                         UpdateT_Pur_Poorderentry_R_QTY(lst);
                     }
@@ -1151,7 +1153,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -1160,8 +1165,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "STK_InStock", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据入库单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "STK_InStock", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据入库单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
 
                         //反写收料通知单入库数量
                         UpdateT_Pur_ReceiveEntry_S_QTY(lst);
@@ -1400,7 +1405,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -1409,8 +1417,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "PUR_MRB", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "PUR_MRB", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
 
                         //反写采购入库单 关联数量
                         UpdateT_Stk_instockEntry_QTY(lst);
@@ -1637,7 +1645,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -1646,8 +1657,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "SAL_OUTSTOCK", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "SAL_OUTSTOCK", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
 
                         //反写发货通知单关联数量
                         UpdateT_SAL_DELIVERYNOTICEENTRY_QTY(lst);
@@ -1864,7 +1875,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -1873,8 +1887,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "SAL_RETURNSTOCK", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "SAL_RETURNSTOCK", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
 
                         //反写销售出库关联数量
                         UpdateT_SAL_OUTSTOCKENTRY_R_QTY(lst);
@@ -2080,7 +2094,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -2089,8 +2106,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "PRD_INSTOCK", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "PRD_INSTOCK", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
 
                         //反写生产订单关联数量
                         UpdateT_PRD_MOENTRY_Q_QTY(lst);
@@ -2282,7 +2299,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -2294,8 +2314,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "PRD_RetStock", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["ResponseStatus"]["SuccessEntitys"].First["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "PRD_RetStock", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["ResponseStatus"]["SuccessEntitys"].First["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
                     }
                 }
             }
@@ -2487,7 +2507,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -2496,8 +2519,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "PRD_PickMtrl", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "PRD_PickMtrl", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
                         //反写用料清单已领数量
                         UpdateT_PRD_PPBOMENTRY_Q_FPICKEDQTY(lst);
                         //反写领料状态
@@ -2680,7 +2703,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -2689,8 +2715,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "PRD_ReturnMtrl", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "PRD_ReturnMtrl", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
 
                         //反写生产领料单
                         UpdateT_PRD_PICKMTRLDATA_QTY(lst);
@@ -2827,7 +2853,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -2836,8 +2865,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "STK_MISCELLANEOUS", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "STK_MISCELLANEOUS", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
                     }
                 }
             }
@@ -2977,7 +3006,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -2986,8 +3018,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "STK_MisDelivery", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "STK_MisDelivery", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
                     }
                 }
             }
@@ -3169,7 +3201,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -3178,8 +3213,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "STK_AssembledApp", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "STK_AssembledApp", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
                     }
                 }
             }
@@ -3405,7 +3440,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     {
                         BillNo = string.Empty;
                         for (int i = 0; i < ((IList)jo["Result"]["ResponseStatus"]["Errors"]).Count; i++)
-                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息                
+                            BillNo += jo["Result"]["ResponseStatus"]["Errors"][i]["Message"].Value<string>() + "\r\n";//保存不成功返错误信息
+
+                        //反写失败状态
+                        UpdateXBT_DataFSBS(fsKeys, false);
                     }
                     else
                     {
@@ -3414,8 +3452,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "STK_TransferDirect", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "STK_TransferDirect", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
 
-                        //反写状态
-                        UpdateXBT_DataFSBS(fsKeys);
+                        //反写成功状态
+                        UpdateXBT_DataFSBS(fsKeys, true);
                     }
                 }
             }
@@ -3443,9 +3481,13 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 单据生成成功 更新xbt_data fsbs标识
         /// </summary>
         /// <param name="pfskeys"></param>
-        private void UpdateXBT_DataFSBS(string pfskeys)
+        private void UpdateXBT_DataFSBS(string pfskeys, bool pIsSuccess)
         {
-            string sql = string.Format("UPDATE xbt_data SET fsbs = 1 WHERE fskey IN({0})", pfskeys);
+            string sql;
+            if (pIsSuccess)
+                sql = string.Format("UPDATE xbt_data SET fsbs = 1 WHERE fskey IN({0})", pfskeys);
+            else
+                sql = string.Format("UPDATE xbt_data SET fsbs = 2 WHERE fskey IN({0})", pfskeys);
             SQLHelper.ExecuteNonQuery(sql);
         }
         /// <summary>
@@ -3478,7 +3520,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string sql = string.Empty;
             foreach (KeyValuePair<string, float> lst in pList)
             {
-                sql += string.Format(" UPDATE t_pur_poorderentry_r SET FSTOCKINQTY = FSTOCKINQTY + {1},FBASESTOCKINQTY = FBASESTOCKINQTY + {1},FSTOCKBASESTOCKINQTY = FSTOCKBASESTOCKINQTY + {1},FJOINQTY = FJOINQTY + {1},FBASEJOINQTY = FBASEJOINQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);//,FREMAINSTOCKINQTY = FREMAINSTOCKINQTY - {1}
+                sql += string.Format(" UPDATE t_pur_poorderentry_r SET FJOINQTY = FJOINQTY + {1},FBASEJOINQTY = FBASEJOINQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);//,FREMAINSTOCKINQTY = FREMAINSTOCKINQTY - {1}FSTOCKINQTY = FSTOCKINQTY + {1},FBASESTOCKINQTY = FBASESTOCKINQTY + {1},FSTOCKBASESTOCKINQTY = FSTOCKBASESTOCKINQTY + {1},
             }
 
             SQLHelper.ExecuteNonQuery(sql);
@@ -3489,13 +3531,13 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <param name="pList"></param>
         private void UpdateT_Pur_ReceiveEntry_S_QTY(Dictionary<string, float> pList)
         {
-            string sql = string.Empty;
-            foreach (KeyValuePair<string, float> lst in pList)
-            {
-                sql += string.Format(" UPDATE T_PUR_ReceiveEntry_s SET FINSTOCKQTY = FINSTOCKQTY + {1},FINSTOCKBASEQTY = FINSTOCKBASEQTY + {1},FJOINBASEQTY = FJOINBASEQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
-            }
+            //string sql = string.Empty;
+            //foreach (KeyValuePair<string, float> lst in pList)
+            //{
+            //    sql += string.Format(" UPDATE T_PUR_ReceiveEntry_s SET FJOINBASEQTY = FJOINBASEQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);//FINSTOCKBASEQTY = FINSTOCKBASEQTY + {1},
+            //}
 
-            SQLHelper.ExecuteNonQuery(sql);
+            //SQLHelper.ExecuteNonQuery(sql);
         }
         /// <summary>
         /// 采购退料成功 反写采购入库单关联数量
@@ -3503,13 +3545,13 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <param name="pList"></param>
         private void UpdateT_Stk_instockEntry_QTY(Dictionary<string, float> pList)
         {
-            string sql = string.Empty;
-            foreach (KeyValuePair<string, float> lst in pList)
-            {
-                sql += string.Format(" UPDATE T_Stk_InstockEntry SET FRETURNJOINQTY = FRETURNJOINQTY + {1},FBASERETURNJOINQTY = FBASERETURNJOINQTY + {1},FBASEJOINQTY = FBASEJOINQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
-            }
+            //string sql = string.Empty;
+            //foreach (KeyValuePair<string, float> lst in pList)
+            //{
+            //    sql += string.Format(" UPDATE T_Stk_InstockEntry SET FRETURNJOINQTY = FRETURNJOINQTY + {1},FBASERETURNJOINQTY = FBASERETURNJOINQTY + {1},FBASEJOINQTY = FBASEJOINQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            //}
 
-            SQLHelper.ExecuteNonQuery(sql);
+            //SQLHelper.ExecuteNonQuery(sql);
         }
         /// <summary>
         /// 销售出库成功 反写发货通知单关联数量
@@ -3520,8 +3562,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string sql = string.Empty;
             foreach (KeyValuePair<string, float> lst in pList)
             {
-                sql += string.Format(" UPDATE T_SAL_DELIVERYNOTICEENTRY SET FJOINOUTQTY = FJOINOUTQTY + {1},FBASEJOINOUTQTY = FBASEJOINOUTQTY + {1},FSUMOUTQTY = FSUMOUTQTY + {1},FBASESUMOUTQTY = FBASESUMOUTQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
-                sql += string.Format(" UPDATE T_SAL_DELIVERYNOTICEENTRY_E SET FSTOCKBASEJOINOUTQTY = FSTOCKBASEJOINOUTQTY + {1},FSTOCKBASESUMOUTQTY = FSTOCKBASESUMOUTQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+                sql += string.Format(" UPDATE T_SAL_DELIVERYNOTICEENTRY SET FJOINOUTQTY = FJOINOUTQTY + {1},FBASEJOINOUTQTY = FBASEJOINOUTQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);//,FSUMOUTQTY = FSUMOUTQTY + {1},FBASESUMOUTQTY = FBASESUMOUTQTY + {1}
+                sql += string.Format(" UPDATE T_SAL_DELIVERYNOTICEENTRY_E SET FSTOCKBASEJOINOUTQTY = FSTOCKBASEJOINOUTQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);//,FSTOCKBASESUMOUTQTY = FSTOCKBASESUMOUTQTY + {1}
             }
 
             SQLHelper.ExecuteNonQuery(sql);
@@ -3546,14 +3588,14 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <param name="pList"></param>
         private void UpdateT_PRD_MOENTRY_Q_QTY(Dictionary<string, float> pList)
         {
-            string sql = string.Empty;
-            foreach (KeyValuePair<string, float> lst in pList)
-            {
-                sql += string.Format(" UPDATE T_PRD_MOENTRY_A SET FSTOCKINQUAAUXQTY = FSTOCKINQUAAUXQTY + {1},FSTOCKINQUAQTY = FSTOCKINQUAQTY + {1},FSTOCKINQUASELAUXQTY = FSTOCKINQUASELAUXQTY + {1},FSTOCKINQUASELQTY = FSTOCKINQUASELQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
-                //sql += string.Format(" UPDATE T_PRD_MOENTRY_Q SET FNOSTOCKINQTY = FNOSTOCKINQTY - {1},FBASENOSTOCKINQTY = FBASENOSTOCKINQTY - {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
-            }
+            //string sql = string.Empty;
+            //foreach (KeyValuePair<string, float> lst in pList)
+            //{
+            //    //sql += string.Format(" UPDATE T_PRD_MOENTRY_A SET FSTOCKINQUAAUXQTY = FSTOCKINQUAAUXQTY + {1},FSTOCKINQUAQTY = FSTOCKINQUAQTY + {1},FSTOCKINQUASELAUXQTY = FSTOCKINQUASELAUXQTY + {1},FSTOCKINQUASELQTY = FSTOCKINQUASELQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            //    //sql += string.Format(" UPDATE T_PRD_MOENTRY_Q SET FNOSTOCKINQTY = FNOSTOCKINQTY - {1},FBASENOSTOCKINQTY = FBASENOSTOCKINQTY - {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            //}
 
-            SQLHelper.ExecuteNonQuery(sql);
+            //SQLHelper.ExecuteNonQuery(sql);
         }
 
         /// <summary>
@@ -3585,13 +3627,13 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <param name="pList"></param>
         private void UpdateT_PRD_PICKMTRLDATA_QTY(Dictionary<string, float> pList)
         {
-            string sql = string.Empty;
-            foreach (KeyValuePair<string, float> lst in pList)
-            {
-                sql += string.Format(" UPDATE T_PRD_PICKMTRLDATA SET FSELPRCDRETURNQTY = FSELPRCDRETURNQTY + {1},FBASESELPRCDRETURNQTY = FBASESELPRCDRETURNQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
-            }
+            //string sql = string.Empty;
+            //foreach (KeyValuePair<string, float> lst in pList)
+            //{
+            //    sql += string.Format(" UPDATE T_PRD_PICKMTRLDATA SET FSELPRCDRETURNQTY = FSELPRCDRETURNQTY + {1},FBASESELPRCDRETURNQTY = FBASESELPRCDRETURNQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);
+            //}
 
-            SQLHelper.ExecuteNonQuery(sql);
+            //SQLHelper.ExecuteNonQuery(sql);
         }
         /// <summary>
         /// 日志
