@@ -2523,7 +2523,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         UpdateXBT_DataFSBS(fsKeys, true);
                         //反写用料清单已领数量
                         UpdateT_PRD_PPBOMENTRY_Q_FPICKEDQTY(lst);
-                        //反写领料状态
+                        //反写生产订单领料状态
                         UpdateMoEntry_Q_FPICKMTRLSTATUS(fmoentryids);
                     }
                 }
@@ -3481,6 +3481,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 单据生成成功 更新xbt_data fsbs标识
         /// </summary>
         /// <param name="pfskeys"></param>
+        /// <param name="pIsSuccess">fsbs：0、未执行接口操作；1、生成成功；2、生成失败</param>
         private void UpdateXBT_DataFSBS(string pfskeys, bool pIsSuccess)
         {
             string sql;
@@ -3607,7 +3608,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string sql = string.Empty;
             foreach (KeyValuePair<string, float> lst in pList)
             {
-                sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {1},FBASEPICKEDQTY = FBASEPICKEDQTY + {1},FSELPICKEDQTY = FSELPICKEDQTY + {1},FBASESELPICKEDQTY = FBASESELPICKEDQTY + {1} WHERE FENTRYID = {0} ", lst.Key, lst.Value);//,FNOPICKEDQTY = FNOPICKEDQTY - {1},FBASENOPICKEDQTY = FBASENOPICKEDQTY - {1}
+                sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {1},FBASEPICKEDQTY = FBASEPICKEDQTY + {1},FSELPICKEDQTY = FSELPICKEDQTY + {1},FBASESELPICKEDQTY = FBASESELPICKEDQTY + {1} WHERE FENTRYID = {0} UPDATE A SET FNOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY,FBASENOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY FROM T_PRD_PPBOMENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY E ON A.FENTRYID = E.FENTRYID WHERE FENTRYID = {0}", lst.Key, lst.Value);
             }
 
             SQLHelper.ExecuteNonQuery(sql);
@@ -3615,10 +3616,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <summary>
         /// 生产领料成功 反写生产订单 领料状态
         /// </summary>
-        /// <param name="pmoentryids"></param>
+        /// <param name="pmoentryids">领料状态：1、未领料；2、部分领料；3、全部领料；4、超额领料。全部领料后反写生产订单业务状态未 结案</param>
         private void UpdateMoEntry_Q_FPICKMTRLSTATUS(string pmoentryids)
         {
-            string sql = string.Format("UPDATE A SET FPICKMTRLSTATUS = CASE WHEN PQ.FPICKEDQTY = 0 THEN 1 WHEN PE.FMUSTQTY > PQ.FPICKEDQTY THEN 2 WHEN PE.FMUSTQTY = PQ.FPICKEDQTY THEN 3 ELSE 4 END FROM T_PRD_MOENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY PE ON PE.FMOENTRYID = A.FENTRYID INNER JOIN T_PRD_PPBOMENTRY_Q PQ ON PE.FENTRYID = PQ.FENTRYID WHERE A.FENTRYID IN({0})", pmoentryids);
+            string sql = string.Format("UPDATE A SET FPICKMTRLSTATUS = CASE WHEN PQ.FPICKEDQTY = 0 THEN 1 WHEN PE.FMUSTQTY > PQ.FPICKEDQTY THEN 2 WHEN PE.FMUSTQTY = PQ.FPICKEDQTY THEN 3 ELSE 4 END FROM T_PRD_MOENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY PE ON PE.FMOENTRYID = A.FENTRYID INNER JOIN T_PRD_PPBOMENTRY_Q PQ ON PE.FENTRYID = PQ.FENTRYID WHERE A.FENTRYID IN({0}) UPDATE A SET FSTATUS = CASE WHEN PE.FMUSTQTY = FBASEPICKEDQTY THEN 6 ELSE FSTATUS END FROM T_PRD_MOENTRY_A A INNER JOIN T_PRD_PPBOMENTRY PE ON PE.FMOENTRYID = A.FENTRYID INNER JOIN T_PRD_PPBOMENTRY_Q PQ ON PE.FENTRYID = PQ.FENTRYID WHERE A.FENTRYID IN({0})", pmoentryids);
             SQLHelper.ExecuteNonQuery(sql);
         }
         /// <summary>
