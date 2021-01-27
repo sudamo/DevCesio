@@ -37,11 +37,6 @@ namespace DevCesio.DevForm.SQL
     /// </summary>
     internal static class SQLHelper
     {
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        static SQLHelper() { }
-
         //ConnectionChecked
         public static string ConnectionChecked(string pConnectionString)
         {
@@ -63,7 +58,7 @@ namespace DevCesio.DevForm.SQL
         }
 
         //NonQuery
-        public static void ExecuteNonQuery(string pCommandText)
+        public static string ExecuteNonQuery(string pCommandText)
         {
             SqlConnection conn = new SqlConnection(GlobalParameter.SQLInf.ConnectionString);
             try
@@ -73,12 +68,16 @@ namespace DevCesio.DevForm.SQL
                 cmd.CommandText = pCommandText;
                 cmd.ExecuteNonQuery();
             }
-            catch { return; }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
             finally
             {
                 if (conn.State == ConnectionState.Open)
                     conn.Close();
             }
+            return string.Empty;
         }
 
         //Scalar
@@ -112,7 +111,7 @@ namespace DevCesio.DevForm.SQL
                 o = cmd.ExecuteScalar();
                 cmd.Parameters.Clear();
             }
-            catch (Exception ex) { return null; }
+            catch (Exception ex) { return "Error:" + ex.Message; }
             finally
             {
                 if (conn.State == ConnectionState.Open)

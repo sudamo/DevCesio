@@ -152,23 +152,26 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// <summary>
         /// 4 销售出库-销售退货
         /// </summary>
-        private const string C_SALOUTSTOCK_SALRETURNSTOCK = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
-	        ,a.fspno 销售出库单号,cus.FNUMBER 客户,org.FNUMBER 销售组织,isnull(dep.fnumber,' ') 销售部门
-	        ,mtl.FNUMBER 物料编码,oe.FMUSTQTY 数量,a.fssl 实退数量,unt.FNUMBER 单位,isnull(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
-	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
-        FROM xbt_data a
-        INNER JOIN T_SAL_OUTSTOCK o ON a.fsid = O.FID
-        INNER JOIN T_SAL_OUTSTOCKENTRY oe ON a.Fsentry = oe.FENTRYID
-        LEFT JOIN T_BD_CUSTOMER cus ON o.FCUSTOMERID = cus.FCUSTID
-        LEFT JOIN T_ORG_ORGANIZATIONS org ON a.Forgid = org.FORGID
-        LEFT JOIN T_BD_DEPARTMENT dep ON o.FDELIVERYDEPTID = dep.FDEPTID
-        INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
-        INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
-        LEFT JOIN T_BD_STOCK stk ON oe.FSTOCKID = stk.FSTOCKID
-		LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
-		LEFT JOIN T_BAS_FLEXVALUES fv ON sf.FFLEXID = FV.FID
-		LEFT JOIN T_BAS_FLEXVALUESENTRY f on sf.FFLEXID = f.FID
-        LEFT JOIN T_BD_STAFF us ON a.fsmen = us.FSTAFFID
+        private const string C_SALOUTSTOCK_SALRETURNSTOCK = @"SELECT A.fskey,A.fsid FID,A.fsentry FENTRYID,A.Forgid
+            ,A.fspno 销售出库单号,cus.FNUMBER 客户,org.FNUMBER 销售组织,ISNULL(dep.fnumber,' ') 销售部门
+            ,mtl.FNUMBER 物料编码,OE.FMUSTQTY 数量,A.fssl 实退数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,A.fspc 批号
+            ,ISNULL(us.FNUMBER,' ') 操作员,B.fscjqh 机器号,B.fsuser 用户,B.fspwd 密码
+            ,ISNULL(DE.FENTRYID,0) FSID,ISNULL(DE.FBASEJOINOUTQTY,0) 关联出库数量
+        FROM xbt_data A
+        INNER JOIN T_SAL_OUTSTOCK O ON A.fsid = O.FID
+        INNER JOIN T_SAL_OUTSTOCKENTRY OE ON A.Fsentry = OE.FENTRYID
+        INNER JOIN T_SAL_OUTSTOCKENTRY_LK OL ON OE.FENTRYID = OL.FENTRYID
+        LEFT JOIN T_SAL_DELIVERYNOTICEENTRY DE ON OL.FSID = DE.FENTRYID
+        LEFT JOIN T_BD_CUSTOMER cus ON O.FCUSTOMERID = cus.FCUSTID
+        LEFT JOIN T_ORG_ORGANIZATIONS org ON A.Forgid = org.FORGID
+        LEFT JOIN T_BD_DEPARTMENT dep ON O.FDELIVERYDEPTID = dep.FDEPTID
+        INNER JOIN T_BD_MATERIAL mtl ON A.fshpid = mtl.FMATERIALID
+        INNER JOIN T_BD_UNIT unt ON A.Fsunit = unt.FUNITID
+        LEFT JOIN T_BD_STOCK stk ON OE.FSTOCKID = stk.FSTOCKID
+        LEFT JOIN T_BD_STOCKFLEXITEM sf ON stk.FSTOCKID = sf.FSTOCKID
+        LEFT JOIN T_BAS_FLEXVALUES fv ON sf.FFLEXID = FV.FID
+        LEFT JOIN T_BAS_FLEXVALUESENTRY f ON sf.FFLEXID = f.FID
+        LEFT JOIN T_BD_STAFF us ON A.fsmen = us.FSTAFFID
         LEFT JOIN (SELECT DISTINCT fscjqh,fslxbs,u.FNAME fsuser,fspwd,fszl FROM xbt_uporder xu INNER JOIN T_SEC_USER u ON xu.fsuser = u.FUSERID) b ON a.fsrklx = b.fslxbs AND a.fscjqh = b.fscjqh
         WHERE a.fsbs = 0 AND a.fsrklx = 4";
         /// <summary>
@@ -242,10 +245,11 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         private const string C_PrdPPBom_PrdPickMtrl = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid FORGID,a.fspno 生产用料清单号,org.FNUMBER 发料组织,ISNULL(org2.fnumber,'') 货主,ISNULL(DEP.FNUMBER,'') 部门
 	        ,mtl.FNUMBER 物料编码,oe.FNEEDQTY 申请数量,a.fssl 实发数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
-	        ,oe.FMOID,oe.fmobillno,oe.fmoentryid,oe.FMOENTRYSEQ,oe.fbomentryid
+	        ,oe.FMOID,oe.fmobillno,oe.fmoentryid,oe.FMOENTRYSEQ,oe.fbomentryid,oq.FBASEPICKEDQTY
         FROM xbt_data a
         INNER JOIN  T_PRD_PPBOMENTRY oe ON a.Fsentry = oe.FENTRYID
-        INNER JOIN  T_PRD_PPBOMENTRY_C oec ON oe.FENTRYID = oec.FENTRYID
+        INNER JOIN  T_PRD_PPBOMENTRY_C oec ON oe.FENTRYID = oec.FENTRYID AND oec.FISSUETYPE = 1
+        INNER JOIN  T_PRD_PPBOMENTRY_Q oq ON oe.FENTRYID = oq.FENTRYID
         LEFT JOIN T_ORG_ORGANIZATIONS org ON oec.FSUPPLYORG = org.FORGID
         LEFT JOIN T_ORG_ORGANIZATIONS org2 ON oec.FOWNERID = org2.FORGID
         INNER JOIN T_BD_MATERIAL mtl ON oe.FMATERIALID = mtl.FMATERIALID
@@ -397,8 +401,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         private const string C_UpdateMo = @"UPDATE A SET FPICKMTRLSTATUS = CASE WHEN B.FPICKEDQTY = 0 THEN 1 WHEN B.FMUSTQTY > B.FPICKEDQTY THEN 2 WHEN B.FMUSTQTY = B.FPICKEDQTY THEN 3 ELSE 4 END
         FROM T_PRD_MOENTRY_Q A
         INNER JOIN
-        (
-        SELECT A.FENTRYID,SUM(PE.FMUSTQTY) FMUSTQTY,SUM(PQ.FPICKEDQTY) FPICKEDQTY
+        (SELECT A.FENTRYID,SUM(PE.FMUSTQTY) FMUSTQTY,SUM(PQ.FPICKEDQTY) FPICKEDQTY
         FROM T_PRD_MOENTRY_Q A
         INNER JOIN T_PRD_PPBOMENTRY PE ON PE.FMOENTRYID = A.FENTRYID
         INNER JOIN T_PRD_PPBOMENTRY_Q PQ ON PE.FENTRYID = PQ.FENTRYID
@@ -407,11 +410,10 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         )B ON A.FENTRYID = B.FENTRYID
         WHERE A.FENTRYID IN({0})
         UPDATE A SET FSTATUS = CASE WHEN B.FLAG = 0 THEN 6 ELSE FSTATUS END
-        FROM T_PRD_MOENTRY_A A 
+        FROM T_PRD_MOENTRY_A A
         INNER JOIN
-        (
-        SELECT A.FENTRYID,SUM(CASE WHEN PE.FMUSTQTY = FBASEPICKEDQTY THEN 0 ELSE 1 END) FLAG
-        FROM T_PRD_MOENTRY_A A 
+        (SELECT A.FENTRYID,SUM(CASE WHEN PE.FMUSTQTY = FBASEPICKEDQTY THEN 0 ELSE 1 END) FLAG
+        FROM T_PRD_MOENTRY_A A
         INNER JOIN T_PRD_PPBOMENTRY PE ON PE.FMOENTRYID = A.FENTRYID 
         INNER JOIN T_PRD_PPBOMENTRY_Q PQ ON PE.FENTRYID = PQ.FENTRYID 
         WHERE A.FENTRYID IN({0})
@@ -1471,6 +1473,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string BillNo = string.Empty;
             string fsKeys = string.Empty;//发货通知单号,客户,发货组织,发货部门,物料编码,应发数量,实发数量,单位,仓库,仓位,批号,操作员,类型,用户,密码,fskey
             Dictionary<string, float> lst = new Dictionary<string, float>();
+
             try
             {
                 K3CloudApiClient client = new K3CloudApiClient(GlobalParameter.K3Inf.C_ERPADDRESS);
@@ -1711,6 +1714,12 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             string BillNo = string.Empty;
             string fsKeys = string.Empty;//销售出库单号,客户,销售组织,销售部门,物料编码,数量,实退数量,单位,仓库,仓位,批号,操作员,类型,用户,密码,fskey
             Dictionary<string, float> lst = new Dictionary<string, float>();
+
+            DataTable dtM = new DataTable();
+            dtM.Columns.Add("FSID");
+            dtM.Columns.Add("关联出库数量");
+            dtM.Columns.Add("实退数量");
+            DataRow dr;
             try
             {
                 K3CloudApiClient client = new K3CloudApiClient(GlobalParameter.K3Inf.C_ERPADDRESS);
@@ -1895,6 +1904,12 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         fsKeys += pDataTable.Rows[i]["fskey"].ToString();
 
                         lst.Add(pDataTable.Rows[i]["FENTRYID"].ToString(), float.Parse(pDataTable.Rows[i]["实退数量"].ToString()));
+
+                        dr = dtM.NewRow();
+                        dr["FSID"] = pDataTable.Rows[i]["FSID"].ToString();
+                        dr["实退数量"] = float.Parse(pDataTable.Rows[i]["实退数量"].ToString());
+                        dr["关联出库数量"] = float.Parse(pDataTable.Rows[i]["关联出库数量"].ToString());
+                        dtM.Rows.Add(dr);
                     }
 
                     // 调用Web API接口服务，保存单据
@@ -1922,6 +1937,9 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                         //反写销售出库关联数量
                         UpdateT_SAL_OUTSTOCKENTRY_R_QTY(lst);
+
+                        //反写发货通知单出库数量
+                        UpdateT_SAL_DELIVERYNOTICEENTRY_QTY(dtM);
                     }
                 }
             }
@@ -2364,7 +2382,12 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         {
             string BillNo = string.Empty;
             string fsKeys = string.Empty;
-            Dictionary<string, float> lst = new Dictionary<string, float>();
+            //Dictionary<string, float> lst = new Dictionary<string, float>();
+            DataTable dtM = new DataTable();
+            dtM.Columns.Add("FENTRYID");
+            dtM.Columns.Add("FSSL");
+            dtM.Columns.Add("FBASEPICKEDQTY");
+            DataRow dr;
             string fmoentryids = string.Empty;
             try
             {
@@ -2389,6 +2412,8 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     JObject model = new JObject();
                     jsonRoot.Add("Model", model);
                     model.Add("FID", 0);
+
+                    //string strFISSUETYPE = pDataTable.Rows[0]["FISSUETYPE"].ToString() == "2" ? "SCLLD02_SYS" : "SCLLD01_SYS";
 
                     JObject basedata = new JObject();
                     basedata.Add("FNumber", "SCLLD01_SYS");
@@ -2486,7 +2511,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         //entryRow.Add("FEntrySrcEntrySeq", pDataTable.Rows[i]["PPFSEQ"].ToString());
 
                         //entryRow.Add("FPPBomBillNo", pDataTable.Rows[i]["PPBILLNO"].ToString());
-                        //entryRow.Add("FPPBOMENTRYID", pDataTable.Rows[i]["PPFENTRYID"].ToString());
+                        entryRow.Add("FPPBOMENTRYID", pDataTable.Rows[i]["FENTRYID"].ToString());
 
                         basedata = new JObject();
                         basedata.Add("FNumber", pDataTable.Rows[i]["部门"].ToString());
@@ -2525,8 +2550,14 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                             fmoentryids += ",";
                         }
                         fsKeys += pDataTable.Rows[i]["fskey"].ToString();
-                        lst.Add(pDataTable.Rows[i]["FENTRYID"].ToString(), float.Parse(pDataTable.Rows[i]["实发数量"].ToString()));
+                        //lst.Add(pDataTable.Rows[i]["FENTRYID"].ToString(), float.Parse(pDataTable.Rows[i]["实发数量"].ToString()));
                         fmoentryids += pDataTable.Rows[i]["fmoentryid"].ToString();
+
+                        dr = dtM.NewRow();
+                        dr["FENTRYID"] = pDataTable.Rows[i]["FENTRYID"].ToString();
+                        dr["FSSL"] = float.Parse(pDataTable.Rows[i]["实发数量"].ToString());
+                        dr["FBASEPICKEDQTY"] = float.Parse(pDataTable.Rows[i]["FBASEPICKEDQTY"].ToString());
+                        dtM.Rows.Add(dr);
                     }
 
                     // 调用Web API接口服务，保存单据
@@ -2552,9 +2583,13 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         //反写成功状态
                         UpdateXBT_DataFSBS(fsKeys, true);
                         //反写用料清单已领数量
-                        UpdateT_PRD_PPBOMENTRY_Q_FPICKEDQTY(lst);
+                        string mes = UpdateT_PRD_PPBOMENTRY_Q_FPICKEDQTY(dtM);
+                        if (!mes.Equals(string.Empty))
+                            return mes;
                         //反写生产订单领料状态
-                        UpdateMoEntry_Q_FPICKMTRLSTATUS(fmoentryids);
+                        mes = UpdateMoEntry_Q_FPICKMTRLSTATUS(fmoentryids);
+                        if (!mes.Equals(string.Empty))
+                            return mes;
                     }
                 }
             }
@@ -3512,14 +3547,22 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// </summary>
         /// <param name="pfskeys"></param>
         /// <param name="pIsSuccess">fsbs：0、未执行接口操作；1、生成成功；2、生成失败</param>
-        private void UpdateXBT_DataFSBS(string pfskeys, bool pIsSuccess)
+        private string UpdateXBT_DataFSBS(string pfskeys, bool pIsSuccess)
         {
             string sql;
             if (pIsSuccess)
                 sql = string.Format("UPDATE xbt_data SET fsbs = 1 WHERE fskey IN({0})", pfskeys);
             else
                 sql = string.Format("UPDATE xbt_data SET fsbs = 2 WHERE fskey IN({0})", pfskeys);
-            SQLHelper.ExecuteNonQuery(sql);
+            try
+            {
+                SQLHelper.ExecuteNonQuery(sql);
+            }
+            catch(Exception ex)
+            {
+                return ex.Message;
+            }
+            return "";
         }
         /// <summary>
         /// 单据生成失败，反写flag
@@ -3600,6 +3643,21 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             SQLHelper.ExecuteNonQuery(sql);
         }
         /// <summary>
+        /// 销售退货成功 反写发货通知单关联数量
+        /// </summary>
+        /// <param name="pList"></param>
+        private void UpdateT_SAL_DELIVERYNOTICEENTRY_QTY(DataTable pDt)
+        {
+            string sql = string.Empty;
+            for (int i = 0; i < pDt.Rows.Count; i++)
+            {
+                sql += string.Format(" UPDATE T_SAL_DELIVERYNOTICEENTRY SET FJOINOUTQTY = FJOINOUTQTY - {1},FBASEJOINOUTQTY = FBASEJOINOUTQTY - {1} WHERE FENTRYID = {0} AND FBASEJOINOUTQTY = {2}", pDt.Rows[i]["FSID"].ToString(), pDt.Rows[i]["实退数量"].ToString(), pDt.Rows[i]["关联出库数量"].ToString());
+                sql += string.Format(" UPDATE T_SAL_DELIVERYNOTICEENTRY_E SET FSTOCKBASEJOINOUTQTY = FSTOCKBASEJOINOUTQTY - {1} WHERE FENTRYID = {0} AND FBASEJOINOUTQTY = {2} ", pDt.Rows[i]["FSID"].ToString(), pDt.Rows[i]["实退数量"].ToString(), pDt.Rows[i]["关联出库数量"].ToString());
+            }
+
+            SQLHelper.ExecuteNonQuery(sql);
+        }
+        /// <summary>
         /// 销售退货成功 反写销售出库单关联数量
         /// </summary>
         /// <param name="pList"></param>
@@ -3633,26 +3691,55 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 生产领料领料成功 反写生产用料清单已领数量
         /// </summary>
         /// <param name="pList"></param>
-        private void UpdateT_PRD_PPBOMENTRY_Q_FPICKEDQTY(Dictionary<string, float> pList)
+        private string UpdateT_PRD_PPBOMENTRY_Q_FPICKEDQTY(DataTable pDt)
         {
             string sql = string.Empty;
-            foreach (KeyValuePair<string, float> lst in pList)
-            {
-                sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {1},FBASEPICKEDQTY = FBASEPICKEDQTY + {1},FSELPICKEDQTY = FSELPICKEDQTY + {1},FBASESELPICKEDQTY = FBASESELPICKEDQTY + {1} WHERE FENTRYID = {0} UPDATE A SET FNOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY,FBASENOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY FROM T_PRD_PPBOMENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY E ON A.FENTRYID = E.FENTRYID WHERE FENTRYID = {0}", lst.Key, lst.Value);
-            }
+            if (pDt.Rows.Count == 0)
+                return "ERROR:没有数据。";
 
-            SQLHelper.ExecuteNonQuery(sql);
+            try
+            {
+                //foreach (KeyValuePair<string, float> lst in pList)
+                //{
+                //    //sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {1},FBASEPICKEDQTY = FBASEPICKEDQTY + {1},FSELPICKEDQTY = FSELPICKEDQTY + {1},FBASESELPICKEDQTY = FBASESELPICKEDQTY + {1} WHERE FENTRYID = {0} UPDATE A SET FNOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY,FBASENOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY FROM T_PRD_PPBOMENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY E ON A.FENTRYID = E.FENTRYID WHERE A.FENTRYID = {0} ", lst.Key, lst.Value);
+                //    sql += string.Format(" UPDATE A SET FNOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY,FBASENOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY FROM T_PRD_PPBOMENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY E ON A.FENTRYID = E.FENTRYID WHERE A.FENTRYID = {0} ", lst.Key, lst.Value);
+                //}
+                //SQLHelper.ExecuteNonQuery(sql);
+                for (int i = 0; i < pDt.Rows.Count; i++)
+                {
+                    sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {1},FBASEPICKEDQTY = FBASEPICKEDQTY + {1},FSELPICKEDQTY = FSELPICKEDQTY + {1},FBASESELPICKEDQTY = FBASESELPICKEDQTY + {1} WHERE FENTRYID = {0} AND FBASEPICKEDQTY = {2} UPDATE A SET FNOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY,FBASENOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY FROM T_PRD_PPBOMENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY E ON A.FENTRYID = E.FENTRYID WHERE A.FENTRYID = {0} ", pDt.Rows[i]["FENTRYID"].ToString(), pDt.Rows[i]["FSSL"].ToString(), pDt.Rows[i]["FBASEPICKEDQTY"].ToString());
+                }
+
+                string str = SQLHelper.ExecuteNonQuery(sql);
+                if (str != "")
+                    return str;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            return "";
         }
         /// <summary>
         /// 生产领料成功 反写生产订单 领料状态
         /// </summary>
         /// <param name="pmoentryids">领料状态：1、未领料；2、部分领料；3、全部领料；4、超额领料。全部领料后反写生产订单业务状态未 结案</param>
-        private void UpdateMoEntry_Q_FPICKMTRLSTATUS(string pmoentryids)
+        private string UpdateMoEntry_Q_FPICKMTRLSTATUS(string pmoentryids)
         {
-
             //string sql = string.Format("UPDATE A SET FPICKMTRLSTATUS = CASE WHEN PQ.FPICKEDQTY = 0 THEN 1 WHEN PE.FMUSTQTY > PQ.FPICKEDQTY THEN 2 WHEN PE.FMUSTQTY = PQ.FPICKEDQTY THEN 3 ELSE 4 END FROM T_PRD_MOENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY PE ON PE.FMOENTRYID = A.FENTRYID INNER JOIN T_PRD_PPBOMENTRY_Q PQ ON PE.FENTRYID = PQ.FENTRYID WHERE A.FENTRYID IN({0}) UPDATE A SET FSTATUS = CASE WHEN PE.FMUSTQTY = FBASEPICKEDQTY THEN 6 ELSE FSTATUS END FROM T_PRD_MOENTRY_A A INNER JOIN T_PRD_PPBOMENTRY PE ON PE.FMOENTRYID = A.FENTRYID INNER JOIN T_PRD_PPBOMENTRY_Q PQ ON PE.FENTRYID = PQ.FENTRYID WHERE A.FENTRYID IN({0})", pmoentryids);
-            string sql = string.Format(C_UpdateMo, pmoentryids);
-            SQLHelper.ExecuteNonQuery(sql);
+            string sql = string.Empty;
+            try
+            {
+                sql = string.Format(" UPDATE A SET FPICKMTRLSTATUS = CASE WHEN B.FPICKEDQTY = 0 THEN 1 WHEN B.FMUSTQTY > B.FPICKEDQTY THEN 2 WHEN B.FMUSTQTY = B.FPICKEDQTY THEN 3 ELSE 4 END FROM T_PRD_MOENTRY_Q A INNER JOIN(SELECT A.FENTRYID,SUM(PE.FMUSTQTY) FMUSTQTY,SUM(PQ.FPICKEDQTY) FPICKEDQTY FROM T_PRD_MOENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY PE ON PE.FMOENTRYID = A.FENTRYID INNER JOIN T_PRD_PPBOMENTRY_Q PQ ON PE.FENTRYID = PQ.FENTRYID WHERE A.FENTRYID IN({0}) GROUP BY A.FENTRYID)B ON A.FENTRYID = B.FENTRYID WHERE A.FENTRYID IN({0}) UPDATE A SET FSTATUS = CASE WHEN B.FLAG = 0 THEN 6 ELSE FSTATUS END FROM T_PRD_MOENTRY_A A INNER JOIN(SELECT A.FENTRYID,SUM(CASE WHEN PE.FMUSTQTY = FBASEPICKEDQTY THEN 0 ELSE 1 END) FLAG FROM T_PRD_MOENTRY_A A INNER JOIN T_PRD_PPBOMENTRY PE ON PE.FMOENTRYID = A.FENTRYID INNER JOIN T_PRD_PPBOMENTRY_Q PQ ON PE.FENTRYID = PQ.FENTRYID WHERE A.FENTRYID IN({0}) GROUP BY A.FENTRYID)B ON A.FENTRYID = B.FENTRYID WHERE A.FENTRYID IN({0}) ", pmoentryids);
+                string str = SQLHelper.ExecuteNonQuery(sql);
+                if (!str.Equals(string.Empty))
+                    return str;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+            return "";
         }
         /// <summary>
         /// 生产退料成功 反写生产领料单关联数量
