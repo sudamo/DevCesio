@@ -131,7 +131,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 7 发货通知单-销售出库
         /// </summary>
         private const string C_SALDELIVERYNOTICE_SALOUTSTOCK = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
-	        ,a.fspno 发货通知单号,cus.FNUMBER 客户,org.FNUMBER 发货组织,ISNULL(dep.fnumber,' ') 发货部门
+	        ,a.fspno 发货通知单号,cus.FNUMBER 客户,org.FNUMBER 发货组织,ISNULL(org2.FNUMBER,'100') 销售组织,ISNULL(dep.fnumber,' ') 发货部门
 	        ,mtl.FNUMBER 物料编码,oe.FQTY - oe.FBASESUMOUTQTY 应发数量,a.fssl 实发数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
             ,ISNULL(oe.F_SWH_TEXT,'') 订单号,ISNULL(oe.F_SWH_Text2,'') 非标尺寸,CONVERT(DECIMAL(18,4),oef.FPRICE) 单价,CONVERT(DECIMAL(18,4),oef.FTAXPRICE) 含税单价,CONVERT(DECIMAL(18,2),oef.FTAXRATE) 税率
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
@@ -141,6 +141,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         INNER JOIN T_SAL_DELIVERYNOTICEENTRY_F oef ON oe.FENTRYID = oef.FENTRYID
         LEFT JOIN T_BD_CUSTOMER cus ON o.FCUSTOMERID = cus.FCUSTID
         LEFT JOIN T_ORG_ORGANIZATIONS org ON o.FDELIVERYORGID = org.FORGID
+        LEFT JOIN T_ORG_ORGANIZATIONS org2 ON o.FSALEORGID = org2.FORGID
         LEFT JOIN T_BD_DEPARTMENT dep ON o.FDELIVERYDEPTID = dep.FDEPTID
         INNER JOIN T_BD_MATERIAL mtl ON a.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON a.Fsunit = unt.FUNITID
@@ -1516,7 +1517,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     model.Add("FDate", DateTime.Today);
 
                     basedata = new JObject();
-                    basedata.Add("FNumber", pDataTable.Rows[0]["发货组织"].ToString());
+                    basedata.Add("FNumber", pDataTable.Rows[0]["销售组织"].ToString());
                     model.Add("FSaleOrgId", basedata);
                     basedata = new JObject();
                     basedata.Add("FNumber", pDataTable.Rows[0]["客户"].ToString());
