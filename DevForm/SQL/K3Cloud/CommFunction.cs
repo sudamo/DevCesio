@@ -1550,7 +1550,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     basedata.Add("FNumber", "PRE001");
                     SubHeadEntity.Add("FSettleCurrID", basedata);
                     basedata = new JObject();
-                    basedata.Add("FNumber", pDataTable.Rows[0]["发货组织"].ToString());
+                    basedata.Add("FNumber", pDataTable.Rows[0]["销售组织"].ToString());
                     SubHeadEntity.Add("FSettleOrgID", basedata);
 
                     SubHeadEntity.Add("FIsIncludedTax", true);
