@@ -156,7 +156,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 4 销售出库-销售退货
         /// </summary>
         private const string C_SALOUTSTOCK_SALRETURNSTOCK = @"SELECT A.fskey,A.fsid FID,A.fsentry FENTRYID,A.Forgid
-            ,A.fspno 销售出库单号,cus.FNUMBER 客户,org.FNUMBER 销售组织,ISNULL(dep.fnumber,' ') 销售部门
+            ,A.fspno 销售出库单号,cus.FNUMBER 客户,org.FNUMBER 发货组织,org2.FNUMBER 销售组织,ISNULL(dep.fnumber,' ') 销售部门
             ,mtl.FNUMBER 物料编码,OE.FMUSTQTY 数量,A.fssl 实退数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,A.fspc 批号
             ,ISNULL(us.FNUMBER,' ') 操作员,B.fscjqh 机器号,B.fsuser 用户,B.fspwd 密码
             ,ISNULL(DE.FENTRYID,0) FSID,ISNULL(DE.FBASEJOINOUTQTY,0) 关联出库数量
@@ -167,6 +167,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         LEFT JOIN T_SAL_DELIVERYNOTICEENTRY DE ON OL.FSID = DE.FENTRYID
         LEFT JOIN T_BD_CUSTOMER cus ON O.FCUSTOMERID = cus.FCUSTID
         LEFT JOIN T_ORG_ORGANIZATIONS org ON A.Forgid = org.FORGID
+        LEFT JOIN T_ORG_ORGANIZATIONS org2 ON O.FSALEORGID = org2.FORGID
         LEFT JOIN T_BD_DEPARTMENT dep ON O.FDELIVERYDEPTID = dep.FDEPTID
         INNER JOIN T_BD_MATERIAL mtl ON A.fshpid = mtl.FMATERIALID
         INNER JOIN T_BD_UNIT unt ON A.Fsunit = unt.FUNITID
@@ -1773,7 +1774,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                     basedata.Add("FNumber", "OverOrgSal");
                     model.Add("FTransferBizType", basedata);
                     basedata = new JObject();
-                    basedata.Add("FNumber", pDataTable.Rows[0]["销售组织"].ToString());
+                    basedata.Add("FNumber", pDataTable.Rows[0]["发货组织"].ToString());
                     model.Add("FStockOrgId", basedata);
                     basedata = new JObject();
                     basedata.Add("FNumber", pDataTable.Rows[0]["客户"].ToString());
