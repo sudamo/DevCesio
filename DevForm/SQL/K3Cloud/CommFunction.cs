@@ -61,13 +61,14 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 1 收料通知单-采购入库
         /// </summary>
         private const string C_PURReceiveBill_STKInStock = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
-	        ,a.fspno 收料通知单号,org.FNUMBER 收料组织,ISNULL(dep.fnumber,' ') 收料部门,ISNULL(sup.FNUMBER,' ') 供应商,ISNULL(org2.fnumber,'') 货主
-	        ,mtl.FNUMBER 物料编码,oe.FACTRECEIVEQTY 交货数量,oe.FACTRECEIVEQTY - oes.FINSTOCKQTY 剩余入库数量,a.fssl 入库数量,unt.FNUMBER 单位,oef.FPRICE 单价,oef.FTAXPRICE 含税单价,ISNULL(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
-	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
+            ,a.fspno 收料通知单号,o.FNOTE 备注,org.FNUMBER 收料组织,ISNULL(dep.fnumber,' ') 收料部门,ISNULL(sup.FNUMBER,' ') 供应商,ISNULL(org2.fnumber,'') 货主
+            ,mtl.FNUMBER 物料编码,oe.FACTRECEIVEQTY 交货数量,oe.FACTRECEIVEQTY - oes.FINSTOCKQTY 剩余入库数量,a.fssl 入库数量,unt.FNUMBER 单位,oef.FPRICE 单价,oef.FTAXPRICE 含税单价,ISNULL(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
+            ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
         FROM xbt_data a
         INNER JOIN T_PUR_RECEIVEENTRY oe ON a.Fsentry = oe.FENTRYID
         INNER JOIN T_PUR_RECEIVEENTRY_s oes ON oe.FENTRYID = oes.FENTRYID
-		INNER JOIN T_PUR_RECEIVEENTRY_F oef ON oe.FENTRYID = oef.FENTRYID
+        INNER JOIN T_PUR_RECEIVEENTRY_F oef ON oe.FENTRYID = oef.FENTRYID
+        INNER JOIN T_PUR_RECEIVE O ON oe.FID = o.FID
         LEFT JOIN T_ORG_ORGANIZATIONS org ON a.Forgid = org.FORGID
         LEFT JOIN T_ORG_ORGANIZATIONS org2 ON a.fownerid = org2.FORGID
         LEFT JOIN T_BD_DEPARTMENT dep ON a.FsDepartid = dep.FDEPTID
@@ -131,7 +132,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
         /// 7 发货通知单-销售出库
         /// </summary>
         private const string C_SALDELIVERYNOTICE_SALOUTSTOCK = @"SELECT a.fskey,a.fsid FID,a.fsentry FENTRYID,a.Forgid
-	        ,a.fspno 发货通知单号,cus.FNUMBER 客户,org.FNUMBER 发货组织,ISNULL(org2.FNUMBER,'100') 销售组织,ISNULL(dep.fnumber,' ') 发货部门
+	        ,a.fspno 发货通知单号,oe.FNOTE 备注,cus.FNUMBER 客户,org.FNUMBER 发货组织,ISNULL(org2.FNUMBER,'100') 销售组织,ISNULL(dep.fnumber,' ') 发货部门
 	        ,mtl.FNUMBER 物料编码,oe.FQTY - oe.FBASESUMOUTQTY 应发数量,a.fssl 实发数量,unt.FNUMBER 单位,ISNULL(stk.fnumber,' ') 仓库,ISNULL(FV.FNUMBER,'0') FV,ISNULL(F.FID,'0') FVV,ISNULL(F.FNUMBER,'0') 仓位,a.fspc 批号
             ,ISNULL(oe.F_SWH_TEXT,'') 订单号,ISNULL(oe.F_SWH_Text2,'') 非标尺寸,CONVERT(DECIMAL(18,4),oef.FPRICE) 单价,CONVERT(DECIMAL(18,4),oef.FTAXPRICE) 含税单价,CONVERT(DECIMAL(18,2),oef.FTAXRATE) 税率
 	        ,ISNULL(us.FNUMBER,' ') 操作员,b.fscjqh 机器号,b.fsuser 用户,b.fspwd 密码
@@ -1127,7 +1128,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         entryRow.Add("FStockStatusId", basedata);
 
                         entryRow.Add("FGiveAway", false);
-                        entryRow.Add("FNote", "PDA InStock");
+                        entryRow.Add("FNote", pDataTable.Rows[i]["备注"].ToString());
 
                         basedata = new JObject();
                         basedata.Add("FNumber", "bag");
@@ -1637,6 +1638,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         entryRow.Add("F_SWH_Text", pDataTable.Rows[i]["订单号"].ToString());
                         entryRow.Add("F_SWH_Text2", pDataTable.Rows[i]["非标尺寸"].ToString());
 
+                        entryRow.Add("FEntrynote", pDataTable.Rows[i]["备注"].ToString());
 
                         //创建与源单之间的关联关系，以支持上查与反写源单
                         entryRow.Add("FSrcBillTypeId", "SAL_DELIVERYNOTICE");
@@ -2591,14 +2593,21 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                         BillNo = "ID:" + jo["Result"]["Id"].Value<string>() + ";Number:" + jo["Result"]["Number"].Value<string>();//保存成功返回入库单FID和单据编号FBILLNO
 
                         client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Submit", new object[] { "PRD_PickMtrl", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号提交单据
-                        client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "PRD_PickMtrl", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
+                        string audit = client.Execute<string>("Kingdee.BOS.WebApi.ServicesStub.DynamicFormService.Audit", new object[] { "PRD_PickMtrl", "{\"CreateOrgId\":\"0\",\"Numbers\":[\"" + jo["Result"]["Number"].Value<string>() + "\"]}" });//根据单号审核单据
+
+                        string mes;
+                        JObject jo2 = JObject.Parse(audit);
+                        if (jo2["Result"]["ResponseStatus"]["IsSuccess"].Value<bool>())//审核成功
+                        {
+                            //反写用料清单已领数量
+                            mes = UpdateT_PRD_PPBOMENTRY_Q_FPICKEDQTY(dtM);
+                            if (!mes.Equals(string.Empty))
+                                return mes;
+                        }
 
                         //反写成功状态
                         UpdateXBT_DataFSBS(fsKeys, true);
-                        //反写用料清单已领数量
-                        string mes = UpdateT_PRD_PPBOMENTRY_Q_FPICKEDQTY(dtM);
-                        if (!mes.Equals(string.Empty))
-                            return mes;
+                        
                         //反写生产订单领料状态
                         mes = UpdateMoEntry_Q_FPICKMTRLSTATUS(fmoentryids);
                         if (!mes.Equals(string.Empty))
@@ -3710,6 +3719,27 @@ namespace DevCesio.DevForm.SQL.K3Cloud
             if (pDt.Rows.Count == 0)
                 return "ERROR:没有数据。";
 
+            DataTable dtTemp = pDt.Clone();
+            bool bCon;
+
+            dtTemp.ImportRow(pDt.Rows[0]);
+            for (int i = 1; i < pDt.Rows.Count; i++)
+            {
+                bCon = false;
+                for (int j = 0; j < dtTemp.Rows.Count; j++)
+                {
+                    if (dtTemp.Rows[j]["FENTRYID"].ToString() == pDt.Rows[i]["FENTRYID"].ToString())
+                    {
+                        dtTemp.Rows[j]["FSSL"] = decimal.Parse(dtTemp.Rows[j]["FSSL"].ToString()) + decimal.Parse(pDt.Rows[i]["FSSL"].ToString());
+                        bCon = true;
+                        break;
+                    }
+                }
+
+                if (!bCon)
+                    dtTemp.ImportRow(pDt.Rows[i]);
+            }
+
             try
             {
                 //foreach (KeyValuePair<string, float> lst in pList)
@@ -3720,7 +3750,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
                 //SQLHelper.ExecuteNonQuery(sql);
                 for (int i = 0; i < pDt.Rows.Count; i++)
                 {
-                    sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {1},FBASEPICKEDQTY = FBASEPICKEDQTY + {1},FSELPICKEDQTY = FSELPICKEDQTY + {1},FBASESELPICKEDQTY = FBASESELPICKEDQTY + {1} WHERE FENTRYID = {0} AND FBASEPICKEDQTY = {2} UPDATE A SET FNOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY,FBASENOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY FROM T_PRD_PPBOMENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY E ON A.FENTRYID = E.FENTRYID WHERE A.FENTRYID = {0} ", pDt.Rows[i]["FENTRYID"].ToString(), pDt.Rows[i]["FSSL"].ToString(), pDt.Rows[i]["FBASEPICKEDQTY"].ToString());
+                    sql += string.Format(" UPDATE T_PRD_PPBOMENTRY_Q SET FPICKEDQTY = FPICKEDQTY + {1},FBASEPICKEDQTY = FBASEPICKEDQTY + {1},FSELPICKEDQTY = FSELPICKEDQTY + {1},FBASESELPICKEDQTY = FBASESELPICKEDQTY + {1} WHERE FENTRYID = {0} AND FBASEPICKEDQTY = {2} UPDATE A SET FNOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY,FBASENOPICKEDQTY = E.FMUSTQTY - FPICKEDQTY FROM T_PRD_PPBOMENTRY_Q A INNER JOIN T_PRD_PPBOMENTRY E ON A.FENTRYID = E.FENTRYID WHERE A.FENTRYID = {0} ", dtTemp.Rows[i]["FENTRYID"].ToString(), dtTemp.Rows[i]["FSSL"].ToString(), dtTemp.Rows[i]["FBASEPICKEDQTY"].ToString());
                 }
 
                 string str = SQLHelper.ExecuteNonQuery(sql);
