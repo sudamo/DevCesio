@@ -59,6 +59,8 @@
             // 
             // timerShow
             // 
+            this.timerShow.Enabled = true;
+            this.timerShow.Interval = 1000;
             this.timerShow.Tick += new System.EventHandler(this.trShow_Tick);
             // 
             // lblDayTime

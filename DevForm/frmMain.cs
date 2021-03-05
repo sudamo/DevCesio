@@ -21,10 +21,6 @@ namespace DevCesio.DevForm
     {
         #region Fields
         /// <summary>
-        /// 时间周期
-        /// </summary>
-        private int _Period;
-        /// <summary>
         /// 计数
         /// </summary>
         private int _Counter;
@@ -48,10 +44,6 @@ namespace DevCesio.DevForm
         /// ...集合
         /// </summary>
         private List<string> _lstDots;
-        /// <summary>
-        /// 日期设置
-        /// </summary>
-        private DateTime _SetDate;
         /// <summary>
         /// 定时器
         /// </summary>
@@ -110,8 +102,6 @@ namespace DevCesio.DevForm
                 SQL_User = ConfigurationManager.AppSettings["SQL_User"];
                 SQL_PWD = ConfigurationManager.AppSettings["SQL_PWD"];
                 T_PickSeconds = ConfigurationManager.AppSettings["T_PickSeconds"];
-                //parameters
-                _Permit = ConfigurationManager.AppSettings["ClientSettingsProvider.ServiceUri"];
                 #endregion
             }
             catch(Exception ex)
@@ -146,20 +136,9 @@ namespace DevCesio.DevForm
             _TimerPara = new TimerParameter(0, int.Parse(T_PickSeconds), 0, false, true, "");
 
             #region 判断程序是否启用
-            //string strFoun = DalCreator.CommFunction.CheckFoun("CesioK3");//-----------------            
-            //else if (strFoun != string.Empty)
-            //{
-            //    MessageBox.Show(strFoun);
-            //    return false;
-            //}
-            _Period = 44262;
-            //_SetDate = DateTime.Parse("1900-01-01").AddDays(_Period);
-            _SetDate = DalCreator.CommFunction.GetDateTime().AddDays(_Period);
-            if (!CheckDate())
-                return false;
             #endregion
 
-            #region 判断MAC是否已注册使用 User <> Administrator
+            #region 判断MAC是否已注册使用
             #endregion
 
             #region 批处理脚本
@@ -189,24 +168,9 @@ namespace DevCesio.DevForm
             }
 
             Text = string.Format("金蝶云星空 仓库条码管理软件专用 当前数据库[{0}]", GlobalParameter.SQLInf.Catalog);            
-            _Context = "\r      条码系统在工作中，必须启动本软件\n\r\n产品名称：金蝶K3云星空条码系统数据管理软件\n\r版权所有：广州馨宝信息技术有限公司\n\r             www.cesio.cn\n          版本号：V2020.0011";
+            _Context = "\r      条码系统在工作中，必须启动本程序\n\r\n产品名称：金蝶K3云星空条码系统数据管理软件\n\r版权所有：广州馨宝信息技术有限公司\n\r             www.cesio.cn\n          版本号：V_2021.0301";
             rtbContext.Text = _Context;
             rtbContext.Font = new Font(rtbContext.Font.FontFamily, 12, rtbContext.Font.Style);
-        }
-        /// <summary>
-        /// 检查日期
-        /// </summary>
-        /// <returns></returns>
-        private bool CheckDate()
-        {
-            if (_Permit.Equals(string.Empty))
-            if (_SetDate < DateTime.Now)
-            {
-                MessageBox.Show("试用期已过");
-                GlobalParameter.IsPause = true;
-                return false;
-            }
-            return true;
         }
         /// <summary>
         /// 定时器设置
@@ -236,8 +200,6 @@ namespace DevCesio.DevForm
         {
             if (GlobalParameter.IsPause)
                 return;
-            if (!CheckDate())
-                return;
             try
             {
                 GlobalParameter.IsPause = true;//执行指令中，暂停定时器
@@ -250,8 +212,6 @@ namespace DevCesio.DevForm
                 UpOrderInfo entity;
                 for (int i = 0; i < dt.Rows.Count; i++)//循环执行所有指令
                 {
-                    //if (i == 0) _Percent = "0 %";
-
                     entity = new UpOrderInfo();
                     entity.Fscjqh = dt.Rows[i]["fscjqh"].ToString();
                     entity.Fslxbs = dt.Rows[i]["fslxbs"].ToString();
