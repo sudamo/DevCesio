@@ -1843,7 +1843,7 @@ namespace DevCesio.DevForm.SQL.K3Cloud
 
                         entryRow.Add("FRealQty", decimal.Parse(pDataTable.Rows[i]["实退数量"].ToString()));
                         entryRow.Add("FIsFree", false);
-                        entryRow.Add("FEntryTaxRate", 13.00);
+                        //entryRow.Add("FEntryTaxRate", 13.00);
 
                         basedata = new JObject();
                         basedata.Add("FNumber", "THLX01_SYS");
